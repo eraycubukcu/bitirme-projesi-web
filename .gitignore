@@ -20,6 +20,7 @@
 **/backend/*.njsproj
 **/backend/*.sln
 **/backend/*.sw?
+**/backend/seed/adminSeed.js
 
 **/frontend/logs
 **/frontend/*.log
