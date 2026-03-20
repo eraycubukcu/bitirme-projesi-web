@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import adminRoutes from "./routes/adminRoute.js";
 import teacherRoutes from "./routes/teacherRoute.js";
+import formRoutes from "./routes/formRoute.js";
+import studentRoutes from "./routes/studentRoute.js";
 
 const app = express();
 dotenv.config();
@@ -16,6 +18,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/teachers", teacherRoutes);
+app.use("/api/form", formRoutes);
+app.use("/api/students", studentRoutes);
 
 app.listen(PORT, () => {
   console.log(`Sunucu ${PORT} portunda çalışıyor.`);

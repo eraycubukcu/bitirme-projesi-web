@@ -1,0 +1,27 @@
+import mongoose from "mongoose";
+
+const studentSchema = new mongoose.Schema(
+  {
+    formData: {
+      type: Object,
+      required: true,
+    },
+
+    preferences: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Teacher",
+      },
+    ],
+
+    assignedTeacher: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Teacher",
+      default: null,
+    },
+  },
+  { timestamps: true },
+);
+
+const Student = mongoose.model("Student", studentSchema);
+export default Student;
