@@ -5,6 +5,7 @@ import adminRoutes from "./routes/adminRoute.js";
 import teacherRoutes from "./routes/teacherRoute.js";
 import formRoutes from "./routes/formRoute.js";
 import studentRoutes from "./routes/studentRoute.js";
+import cors from "cors";
 
 const app = express();
 dotenv.config();
@@ -12,10 +13,7 @@ connectDB();
 
 const PORT = process.env.PORT | 5000;
 
-app.get("/", (req, res) => {
-  res.send("Anasayfa");
-});
-
+app.use(cors());
 app.use("/api/admin", adminRoutes);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/form", formRoutes);

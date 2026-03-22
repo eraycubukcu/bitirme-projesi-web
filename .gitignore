@@ -21,6 +21,7 @@
 **/backend/*.sln
 **/backend/*.sw?
 **/backend/seed/adminSeed.js
+**/backend/seed/teacherSeed.js
 
 **/frontend/logs
 **/frontend/*.log
