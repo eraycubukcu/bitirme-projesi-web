@@ -60,7 +60,7 @@ function FormPage() {
 
         {/* Başlık */}
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-[#044074]">BİTİRME PROJESİ DANIŞMAN SEÇİMİ</h1>
+          <h1 className="text-2xl font-medium text-[#044074]">BİTİRME PROJESİ DANIŞMAN SEÇİMİ</h1>
           <p className="text-sm text-gray-400 mt-1">
             Lütfen tüm alanları eksiksiz doldurunuz.
           </p>
