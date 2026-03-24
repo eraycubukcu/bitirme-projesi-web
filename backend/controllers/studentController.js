@@ -17,7 +17,7 @@ export const submitForm = async (req, res) => {
 
     // zorunlu alanları kontrol edelim doldurulmuş mu
     for (let field of form.textFields) {
-      if (field.required && !formData[field.key]) {
+      if (field.required && !formData[field.key]?.toString().trim()) {
         return res.status(400).json({
           message: `${field.label} zorunlu`,
         });
@@ -41,6 +41,16 @@ export const submitForm = async (req, res) => {
       });
     }
 
+    for (let teacherId of preferences) {
+      const teacher = await Teacher.findById(teacherId);
+
+      if (!teacher) {
+        return res.status(400).json({
+          message: "Hoca bulunamadı",
+        });
+      }
+    }
+
     const student = await Student.create({
       formData,
       preferences,
@@ -51,8 +61,21 @@ export const submitForm = async (req, res) => {
       student,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       message: "Server hatası",
+    });
+  }
+};
+
+export const getStudents = async (req, res) => {
+  try {
+    const students = await Student.find().sort({ createdAt: -1 });
+    res.json(students);
+  } catch (error) {
+    res.status(500).json({
+      message: "Server hatası",
+      error: error.message,
     });
   }
 };
