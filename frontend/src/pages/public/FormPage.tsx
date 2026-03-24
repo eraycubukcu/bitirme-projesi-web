@@ -6,103 +6,156 @@ function FormPage() {
   const [form, setForm] = useState<FormConfig | null>(null);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [formData, setFormData] = useState<Record<string, string>>({});
-  const [preferences, setPreferences] = useState<string[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const formRes = await api.get("/form");
-        const teacherRes = await api.get("/teachers");
-
-        setForm(formRes.data);
-        setTeachers(teacherRes.data);
-
-        // preference array oluştur (hoca sayısı kadar)
-        setPreferences(new Array(teacherRes.data.length).fill(""));
-      } catch (error) {
-        console.error(error);
-      }
+      const formRes = await api.get("/form");
+      const teacherRes = await api.get("/teachers");
+      setForm(formRes.data);
+      setTeachers(teacherRes.data);
     };
-
     fetchData();
   }, []);
 
-  const handleChange = (key: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+  const moveUp = (index: number) => {
+    if (index === 0) return;
+    const updated = [...teachers];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    setTeachers(updated);
   };
 
-  const handlePreferenceChange = (index: number, value: string) => {
-    const newPrefs = [...preferences];
-    newPrefs[index] = value;
-    setPreferences(newPrefs);
+  const moveDown = (index: number) => {
+    if (index === teachers.length - 1) return;
+    const updated = [...teachers];
+    [updated[index + 1], updated[index]] = [updated[index], updated[index + 1]];
+    setTeachers(updated);
   };
 
   const handleSubmit = () => {
+    if (form) {
+      for (const field of form.textFields) {
+        if (!formData[field.key]?.trim()) {
+          setError(`"${field.label}" alanı boş bırakılamaz.`);
+          return;
+        }
+      }
+    }
+
+    setError("");
     console.log("FORM DATA:", formData);
-    console.log("PREFERENCES:", preferences);
+    console.log("PREFERENCES:", teachers.map((t) => t._id));
   };
 
-  if (!form) {
-    return <div className="p-10">Yükleniyor...</div>;
-  }
+  if (!form)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500 text-sm animate-pulse">Yükleniyor...</p>
+      </div>
+    );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow w-full max-w-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Form
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="bg-white w-full max-w-lg rounded-2xl shadow-lg p-8">
 
-        {/* TEXT INPUTLAR */}
-        {form.textFields.map((field: Field) => (
-          <div key={field.key} className="mb-4">
-            <label className="block mb-1 font-medium">
-              {field.label}
-            </label>
-            <input
-              className="border p-2 w-full rounded"
-              placeholder={field.label}
-              value={formData[field.key] || ""}
-              onChange={(e) =>
-                handleChange(field.key, e.target.value)
-              }
-            />
-          </div>
-        ))}
+        {/* Başlık */}
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold text-[#044074]">BİTİRME PROJESİ DANIŞMAN SEÇİMİ</h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Lütfen tüm alanları eksiksiz doldurunuz.
+          </p>
+        </div>
 
-        {/* HOCA SIRALAMA */}
-        <h2 className="mt-6 mb-2 font-bold">
-          Hoca Sıralama
-        </h2>
+        {/* Text Alanları */}
+        <div className="space-y-4 mb-8">
+          {form.textFields.map((field: Field) => (
+            <div key={field.key} className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-gray-700">
+                {field.label}
+              </label>
+              <input
+                type="text"
+                placeholder={`${field.label} giriniz`}
+                value={formData[field.key] || ""}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    [field.key]: e.target.value,
+                  }))
+                }
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#044074]/30 focus:border-[#044074] transition"
+              />
+            </div>
+          ))}
+        </div>
 
-        {teachers.map((_, index) => (
-          <select
-            key={index}
-            className="border p-2 w-full mb-2 rounded"
-            value={preferences[index]}
-            onChange={(e) =>
-              handlePreferenceChange(index, e.target.value)
-            }
-          >
-            <option value="">Seçiniz</option>
+        {/* Hoca Sıralama */}
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-gray-700 mb-1">
+            Hoca Tercihleri
+          </h2>
+          <p className="text-xs text-gray-400 mb-4">
+            Oklara tıklayarak hocaları tercih sıranıza göre düzenleyiniz.
+          </p>
 
-            {teachers.map((teacher) => (
-              <option key={teacher._id} value={teacher._id}>
-                {teacher.name}
-              </option>
+          <div className="space-y-2">
+            {teachers.map((teacher, index) => (
+              <div
+                key={teacher._id}
+                className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3"
+              >
+                {/* Sıra numarası */}
+                <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#044074] text-white text-xs font-bold shrink-0">
+                  {index + 1}
+                </span>
+
+                {/* İsim */}
+                <span className="flex-1 text-sm font-medium text-gray-800">
+                  {teacher.name}
+                </span>
+
+                {/* Ok butonları */}
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    onClick={() => moveUp(index)}
+                    disabled={index === 0}
+                    className="p-1 rounded hover:bg-gray-200 disabled:opacity-20 disabled:cursor-not-allowed transition"
+                  >
+                    <svg className="w-4 h-4 text-[#044074]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => moveDown(index)}
+                    disabled={index === teachers.length - 1}
+                    className="p-1 rounded hover:bg-gray-200 disabled:opacity-20 disabled:cursor-not-allowed transition"
+                  >
+                    <svg className="w-4 h-4 text-[#044074]" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             ))}
-          </select>
-        ))}
+          </div>
+        </div>
 
-        {/* SUBMIT */}
+        {/* Hata Mesajı */}
+        {error && (
+          <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-2.5 mb-4">
+            <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-5.25a.75.75 0 001.5 0v-4a.75.75 0 00-1.5 0v4zm.75-7a1 1 0 100 2 1 1 0 000-2z" clipRule="evenodd" />
+            </svg>
+            {error}
+          </div>
+        )}
+
+        {/* Submit */}
         <button
           onClick={handleSubmit}
-          className="w-full bg-blue-500 text-white py-2 rounded mt-4 hover:bg-blue-600"
+          className="w-full py-3 rounded-lg bg-[#044074] hover:bg-[#033260] active:scale-95 text-white font-semibold text-sm transition-all duration-150"
         >
-          Gönder
+          Formu Gönder
         </button>
       </div>
     </div>
