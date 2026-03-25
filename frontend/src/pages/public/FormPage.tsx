@@ -8,6 +8,7 @@ function FormPage() {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,6 +35,8 @@ function FormPage() {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+
     if (form) {
       for (const field of form.textFields) {
         if (!formData[field.key]?.trim()) {
@@ -44,11 +47,12 @@ function FormPage() {
     }
 
     setError("");
+    setIsSubmitting(true);
 
     try {
       await api.post("/students/submit", {
-        formData, // text alanları
-        preferences: teachers.map((t) => t._id), // sıralı hoca ID'leri
+        formData,
+        preferences: teachers.map((t) => t._id),
       });
 
       setSubmitted(true);
@@ -146,7 +150,7 @@ function FormPage() {
                 className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3"
               >
                 {/* Sıra numarası */}
-                <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#044074] text-white text-xs font-bold shrink-0">
+                <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#044074] text-white text-xs font-medium shrink-0">
                   {index + 1}
                 </span>
 
@@ -222,9 +226,10 @@ function FormPage() {
         {/* Submit */}
         <button
           onClick={handleSubmit}
+          disabled={isSubmitting}
           className="w-full py-3 rounded-lg bg-[#044074] hover:bg-[#033260] active:scale-95 text-white font-semibold text-sm transition-all duration-150"
         >
-          Formu Gönder
+          {isSubmitting ? "Gönderiliyor..." : "Formu Gönder"}
         </button>
       </div>
     </div>
