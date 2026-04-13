@@ -8,6 +8,7 @@ export interface Field {
 export interface FormConfig {
   isActive: boolean;
   textFields: Field[];
+  description : string;
 }
 
 export interface Teacher {

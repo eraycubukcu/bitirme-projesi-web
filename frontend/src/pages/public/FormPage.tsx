@@ -99,28 +99,30 @@ function FormPage() {
     );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-lg p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
+      <div className="w-full max-w-md bg-white rounded-xl border border-gray-100 shadow-sm p-6 sm:p-8">
         {/* Başlık */}
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-medium text-[#044074]">
-            BİTİRME PROJESİ DANIŞMAN SEÇİMİ
+        <div className="mb-8">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+            Danışman Seçimi
           </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Lütfen tüm alanları eksiksiz doldurunuz.
-          </p>
+          {form.description && (
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">
+              {form.description}
+            </p>
+          )}
         </div>
 
-        {/* Text Alanları */}
-        <div className="space-y-4 mb-8">
+        {/* Inputs */}
+        <div className="space-y-5 mb-8">
           {form.textFields.map((field: Field) => (
-            <div key={field.key} className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">
+            <div key={field.key}>
+              <label className="text-xs sm:text-sm text-gray-500">
                 {field.label}
               </label>
+
               <input
                 type="text"
-                placeholder={`${field.label} giriniz`}
                 value={formData[field.key] || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -128,108 +130,63 @@ function FormPage() {
                     [field.key]: e.target.value,
                   }))
                 }
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#044074]/30 focus:border-[#044074] transition"
+                className="w-full mt-1 border-b border-gray-200 py-2 text-sm 
+              focus:outline-none focus:border-gray-900 transition"
               />
             </div>
           ))}
         </div>
-
-        {/* Hoca Sıralama */}
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-gray-700 mb-1">
-            Hoca Tercihleri
+        {/* Hoca sıralama */}
+        <div className="mb-8">
+          <h2 className="text-sm font-medium text-gray-700 mb-3">
+            Tercih Sıralaması
           </h2>
-          <p className="text-xs text-gray-400 mb-4">
-            Oklara tıklayarak hocaları tercih sıranıza göre düzenleyiniz.
-          </p>
-
           <div className="space-y-2">
             {teachers.map((teacher, index) => (
               <div
                 key={teacher._id}
-                className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3"
+                className="flex items-center justify-between border py-2 px-2 rounded-md hover:bg-gray-50 transition"
               >
-                {/* Sıra numarası */}
-                <span className="w-6 h-6 flex items-center justify-center rounded-full bg-[#044074] text-white text-xs font-medium shrink-0">
-                  {index + 1}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-400 w-4">{index + 1}</span>
 
-                {/* İsim */}
-                <span className="flex-1 text-sm font-medium text-gray-800">
-                  {teacher.name}
-                </span>
+                  <span className="text-sm text-gray-800 truncate max-w-[140px] sm:max-w-none">
+                    {teacher.name}
+                  </span>
+                </div>
 
-                {/* Ok butonları */}
-                <div className="flex flex-col gap-0.5">
+                <div className="flex gap-2">
                   <button
                     onClick={() => moveUp(index)}
                     disabled={index === 0}
-                    className="p-1 rounded hover:bg-gray-200 disabled:opacity-20 disabled:cursor-not-allowed transition"
+                    className="text-gray-400 hover:text-gray-800 disabled:opacity-20 text-xl"
                   >
-                    <svg
-                      className="w-4 h-4 text-[#044074]"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 15l7-7 7 7"
-                      />
-                    </svg>
+                    ↑
                   </button>
                   <button
                     onClick={() => moveDown(index)}
                     disabled={index === teachers.length - 1}
-                    className="p-1 rounded hover:bg-gray-200 disabled:opacity-20 disabled:cursor-not-allowed transition"
+                    className="text-gray-400 hover:text-gray-800 disabled:opacity-20 text-xl"
                   >
-                    <svg
-                      className="w-4 h-4 text-[#044074]"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
+                    ↓
                   </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Hata Mesajı */}
+        {/* Error */}
         {error && (
-          <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-4 py-2.5 mb-4">
-            <svg
-              className="w-4 h-4 shrink-0"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-5.25a.75.75 0 001.5 0v-4a.75.75 0 00-1.5 0v4zm.75-7a1 1 0 100 2 1 1 0 000-2z"
-                clipRule="evenodd"
-              />
-            </svg>
-            {error}
-          </div>
+          <p className="text-xs sm:text-sm text-red-500 mb-4">{error}</p>
         )}
-
         {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full py-3 rounded-lg bg-[#044074] hover:bg-[#033260] active:scale-95 text-white font-semibold text-sm transition-all duration-150"
+          className="w-full py-3 text-sm font-medium text-white bg-gray-900 
+        hover:bg-black active:scale-[0.98] transition rounded-lg"
         >
-          {isSubmitting ? "Gönderiliyor..." : "Formu Gönder"}
+          {isSubmitting ? "Gönderiliyor..." : "Gönder"}
         </button>
       </div>
     </div>

@@ -25,3 +25,7 @@ const studentSchema = new mongoose.Schema(
 
 const Student = mongoose.model("Student", studentSchema);
 export default Student;
+
+// form verisinden gelen bilgiler
+// hoca tercihleri
+// admin tarafından atanan öğrenci bilgisi
