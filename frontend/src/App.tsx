@@ -1,12 +1,21 @@
 import { Route, Routes } from "react-router-dom";
 import FormPage from "./pages/public/FormPage";
-import LoginPage from "./pages/public/auth/LoginPage";
+import LoginPage from "./pages/admin/LoginPage";
+import AdminLayout from "./pages/layouts/AdminLayout";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<FormPage />}></Route>
-      <Route path="/login" element={<LoginPage />}></Route>
+      <Route path="/" element={<FormPage />} />
+
+      <Route path="/admin/login" element={<LoginPage />} />
+
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route path="dashboard" element={<div>Dashboard</div>} />
+        <Route path="students" element={<div>Students</div>} />
+        <Route path="teachers" element={<div>Teachers</div>} />
+        <Route path="form" element={<div>Form</div>} />
+      </Route>
     </Routes>
   );
 }
