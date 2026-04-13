@@ -1,10 +1,12 @@
 import { Route, Routes } from "react-router-dom";
 import FormPage from "./pages/public/FormPage";
+import LoginPage from "./pages/public/auth/LoginPage";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<FormPage />}></Route>
+      <Route path="/login" element={<LoginPage />}></Route>
     </Routes>
   );
 }
