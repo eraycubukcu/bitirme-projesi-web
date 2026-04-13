@@ -19,7 +19,7 @@ const teacherSchema = new mongoose.Schema(
     },
     currentCount: {
       type: Number,
-      required: true,
+      default : 0
     },
   },
   { timestamps: true },

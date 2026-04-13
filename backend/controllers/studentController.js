@@ -70,12 +70,12 @@ export const submitForm = async (req, res) => {
 
 export const getStudents = async (req, res) => {
   try {
-    const students = await Student.find().sort({ createdAt: -1 });
+    const students = await Student.find()
+      .populate("preferences")
+      .populate("assignedTeacher");
+
     res.json(students);
   } catch (error) {
-    res.status(500).json({
-      message: "Server hatası",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Öğrenciler alınamadı" });
   }
 };
