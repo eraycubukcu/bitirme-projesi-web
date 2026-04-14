@@ -7,7 +7,7 @@ const AdminLayout = () => {
   const menu = [
     { name: "Dashboard", path: "/admin/dashboard" },
     { name: "Öğrenci Atama", path: "/admin/students" },
-    { name: "Öğretmen Ayarları", path: "/admin/teachers" },
+    { name: "Danışman Ayarları", path: "/admin/teachers" },
     { name: "Form Ayarları", path: "/admin/form" },
   ];
   return (

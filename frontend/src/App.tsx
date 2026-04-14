@@ -2,6 +2,11 @@ import { Route, Routes } from "react-router-dom";
 import FormPage from "./pages/public/FormPage";
 import LoginPage from "./pages/admin/LoginPage";
 import AdminLayout from "./pages/layouts/AdminLayout";
+import ProtectedRoute from "./pages/components/ProtectedRoute";
+import Dashboard from "./pages/admin/Dashboard";
+import StudentsPage from "./pages/admin/StudentsPage";
+import TeachersPage from "./pages/admin/TeachersPage";
+import FormSettingsPage from "./pages/admin/FormSettingsPage";
 
 function App() {
   return (
@@ -10,11 +15,18 @@ function App() {
 
       <Route path="/admin/login" element={<LoginPage />} />
 
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route path="dashboard" element={<div>Dashboard</div>} />
-        <Route path="students" element={<div>Students</div>} />
-        <Route path="teachers" element={<div>Teachers</div>} />
-        <Route path="form" element={<div>Form</div>} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="students" element={<StudentsPage />} />
+        <Route path="teachers" element={<TeachersPage />} />
+        <Route path="form" element={<FormSettingsPage />} />
       </Route>
     </Routes>
   );

@@ -17,7 +17,7 @@ export const createTeacher = async (req, res) => {
     }
 
     const teacher = await Teacher.create({
-      bame,
+      name,
       minQuota,
       maxQuota,
     });
@@ -48,7 +48,7 @@ export const getTeachers = async (req, res) => {
 
 export const deleteTeacher = async (req, res) => {
   try {
-    const { id } = req.params;
+    const teacher = await Teacher.findByIdAndDelete(req.params.id);
     if (!teacher) {
       return res.status(400).json({
         message: "Hoca bulunamadı",
