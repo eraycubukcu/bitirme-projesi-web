@@ -69,6 +69,12 @@ function FormPage() {
       </div>
     );
 
+  const now = new Date();
+  const start = form.startDate ? new Date(form.startDate) : null;
+  const end = form.endDate ? new Date(form.endDate) : null;
+
+  const isFormOpen = (!start || now >= start) && (!end || now <= end);
+
   if (submitted)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -98,6 +104,30 @@ function FormPage() {
       </div>
     );
 
+  if (!isFormOpen)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
+        <div className="bg-white/80 backdrop-blur-md border border-gray-200 shadow-xl rounded-2xl p-8 text-center max-w-md w-full">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Form Kapalı
+          </h2>
+
+          {start && now < start && (
+            <p className="text-sm text-gray-500">
+              Başlangıç:{" "}
+              <span className="font-medium text-gray-700">
+                {start.toLocaleString()}
+              </span>
+            </p>
+          )}
+
+          {end && now > end && (
+            <p className="text-sm text-gray-500">Bu formun süresi doldu.</p>
+          )}
+        </div>
+      </div>
+    );
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
       <div className="w-full max-w-md bg-white rounded-xl border border-gray-100 shadow-sm p-6 sm:p-8">
@@ -109,6 +139,12 @@ function FormPage() {
           {form.description && (
             <p className="text-xs sm:text-sm text-gray-400 mt-1">
               {form.description}
+            </p>
+          )}
+          {form.endDate && (
+            <p className="text-xs sm:text-sm text-red-500 mt-1 font-medium">
+              Son Tarih:{" "}
+              {new Date(form.endDate).toLocaleString("tr-TR")}
             </p>
           )}
         </div>
@@ -130,12 +166,13 @@ function FormPage() {
                     [field.key]: e.target.value,
                   }))
                 }
-                className="w-full mt-1 border-b border-gray-200 py-2 text-sm 
-              focus:outline-none focus:border-gray-900 transition"
+                className="w-full mt-1 border-b border-gray-200 py-2 text-sm
+                focus:outline-none focus:border-gray-900 transition"
               />
             </div>
           ))}
         </div>
+
         {/* Hoca sıralama */}
         <div className="mb-8">
           <h2 className="text-sm font-medium text-gray-700 mb-3">
@@ -150,9 +187,7 @@ function FormPage() {
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-gray-400 w-4">{index + 1}</span>
 
-                  <span className="text-sm text-gray-800 truncate max-w-[140px] sm:max-w-none">
-                    {teacher.name}
-                  </span>
+                  <span className="text-sm text-gray-800">{teacher.name}</span>
                 </div>
 
                 <div className="flex gap-2">
@@ -175,16 +210,18 @@ function FormPage() {
             ))}
           </div>
         </div>
+
         {/* Error */}
         {error && (
           <p className="text-xs sm:text-sm text-red-500 mb-4">{error}</p>
         )}
+
         {/* Submit */}
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full py-3 text-sm font-medium text-white bg-gray-900 
-        hover:bg-black active:scale-[0.98] transition rounded-lg"
+          className="w-full py-3 text-sm font-medium text-white bg-gray-900
+          hover:bg-black active:scale-[0.98] transition rounded-lg"
         >
           {isSubmitting ? "Gönderiliyor..." : "Gönder"}
         </button>

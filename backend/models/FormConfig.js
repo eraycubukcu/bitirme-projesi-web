@@ -23,11 +23,13 @@ const fieldSchema = new mongoose.Schema({
 const formConfigSchema = new mongoose.Schema(
   {
     // form sadece belirli zamanlarda açık olacak.
-    isActive: {
-      type: Boolean,
-      default: false,
+    startDate: {
+      type: Date,
     },
-    description : {
+    endDate: {
+      type: Date,
+    },
+    description: {
       type: String,
     },
     textFields: [fieldSchema],
@@ -39,4 +41,3 @@ const FormConfig = mongoose.model("FormConfig", formConfigSchema);
 export default FormConfig;
 
 // fieldSchema'dan gelen fieldlar formConfigSchema'ya ekleniyor.
-// ayrıca formun aktiflik durumunu kontrol eden isActive mekanizması.

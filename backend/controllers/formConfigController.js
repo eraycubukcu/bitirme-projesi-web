@@ -23,7 +23,7 @@ export const getForm = async (req, res) => {
 // formu güncelleme işi only admin
 export const updateForm = async (req, res) => {
   try {
-    const { textFields, isActive } = req.body;
+    const { textFields, isActive, description, startDate, endDate } = req.body;
 
     let form = await FormConfig.findOne();
 
@@ -31,12 +31,16 @@ export const updateForm = async (req, res) => {
       form = new FormConfig({
         textFields,
         isActive,
+        description,
       });
     } else {
       const fixedFields = form.textFields.filter((f) => f.fixed);
 
       form.textFields = [...fixedFields, ...textFields.filter((f) => !f.fixed)];
       form.isActive = isActive ?? form.isActive;
+      form.description = description ?? form.description;
+      form.startDate = startDate ?? form.startDate;
+      form.endDate = endDate ?? form.endDate;
     }
 
     await form.save();
