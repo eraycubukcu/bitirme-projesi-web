@@ -6,6 +6,7 @@ const StudentsPage = () => {
   const [teachers, setTeachers] = useState<any[]>([]);
   const [formConfig, setFormConfig] = useState<any>(null);
   const [selectedTeachers, setSelectedTeachers] = useState<any>({});
+  const [updatedMap, setUpdatedMap] = useState<any>({});
 
   const fetchStudents = async () => {
     const res = await api.get("/students");
@@ -39,12 +40,16 @@ const StudentsPage = () => {
     }
 
     try {
-      await api.post(`/admin/assign`, {
+      await api.post(`/admin/assigned`, {
         teacherId,
         studentId,
       });
 
       await fetchStudents();
+      setUpdatedMap((prev: any) => ({
+        ...prev,
+        [studentId]: false,
+      }));
     } catch (err: any) {
       console.log(err);
       alert("Atama başarısız");
@@ -90,9 +95,7 @@ const StudentsPage = () => {
               }}
             >
               {columns.map((col: any) => (
-                <div key={col.key}>
-                  {s.formData?.[col.key] || "-"}
-                </div>
+                <div key={col.key}>{s.formData?.[col.key] || "-"}</div>
               ))}
 
               <div>
@@ -104,13 +107,31 @@ const StudentsPage = () => {
                     s.assignedTeacher ||
                     ""
                   }
-                  disabled={!!s.assignedTeacher}
-                  onChange={(e) =>
+                  // disabled={!!s.assignedTeacher}
+
+                  onChange={(e) => {
+                    const value = e.target.value;
+
                     setSelectedTeachers((prev: any) => ({
                       ...prev,
-                      [s._id]: e.target.value,
-                    }))
-                  }
+                      [s._id]: value,
+                    }));
+
+                    // eğer mevcut atamadan farklıysa "güncellenecek" işaretle
+                    if (
+                      value !== (s.assignedTeacher?._id || s.assignedTeacher)
+                    ) {
+                      setUpdatedMap((prev: any) => ({
+                        ...prev,
+                        [s._id]: true,
+                      }));
+                    } else {
+                      setUpdatedMap((prev: any) => ({
+                        ...prev,
+                        [s._id]: false,
+                      }));
+                    }
+                  }}
                 >
                   <option value="">Seç</option>
 
@@ -131,26 +152,27 @@ const StudentsPage = () => {
               <div>
                 <button
                   onClick={() => handleAssign(s._id)}
-                  disabled={!!s.assignedTeacher}
-                  className={`px-3 py-1 rounded text-sm w-40 ${
-                    s.assignedTeacher
-                      ? "bg-gray-300 cursor-not-allowed"
-                      : "bg-blue-500 text-white"
-                  }`}
+                  // disabled={!!s.assignedTeacher}
+                  // className={`px-3 py-1 rounded text-sm w-40 ${
+                  //   s.assignedTeacher
+                  //     ? "bg-gray-300 cursor-not-allowed"
+                  //     : "bg-blue-500 text-white"
+                  // }`}
+                  className="bg-blue-500 text-white px-3 py-1 rounded text-sm w-40"
                 >
-                  Ata
+                  {updatedMap[s._id] ? "Güncelle" : "Ata"}
                 </button>
               </div>
 
               <div>
-                {s.assignedTeacher ? (
-                  <span className="text-green-600 font-medium">
-                    {assignedTeacher?.name || "Atandı"}
+                {updatedMap[s._id] ? (
+                  <span className="text-blue-600 font-medium">
+                    Güncellenecek
                   </span>
+                ) : s.assignedTeacher ? (
+                  <span className="text-green-600 font-medium">Atandı</span>
                 ) : (
-                  <span className="text-yellow-600 font-medium">
-                    Bekliyor
-                  </span>
+                  <span className="text-yellow-600 font-medium">Bekliyor</span>
                 )}
               </div>
             </div>
