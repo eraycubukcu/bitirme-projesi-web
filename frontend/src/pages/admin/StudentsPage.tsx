@@ -89,14 +89,12 @@ const StudentsPage = () => {
                 gridTemplateColumns: `repeat(${columns.length + 3}, minmax(120px,1fr))`,
               }}
             >
-              {/* 🔥 formData */}
               {columns.map((col: any) => (
                 <div key={col.key}>
                   {s.formData?.[col.key] || "-"}
                 </div>
               ))}
 
-              {/* 🔥 TERCIHLER */}
               <div>
                 <select
                   className="border px-2 py-1 rounded"
@@ -130,7 +128,6 @@ const StudentsPage = () => {
                 </select>
               </div>
 
-              {/* 🔥 ATA */}
               <div>
                 <button
                   onClick={() => handleAssign(s._id)}
@@ -145,7 +142,6 @@ const StudentsPage = () => {
                 </button>
               </div>
 
-              {/* 🔥 DURUM */}
               <div>
                 {s.assignedTeacher ? (
                   <span className="text-green-600 font-medium">

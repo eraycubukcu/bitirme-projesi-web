@@ -27,9 +27,9 @@ const LoginPage = () => {
       }, 400);
     } catch (err: any) {
       setError(err.response?.data?.message || "Giriş başarısız.");
-      setPassword(""); // UX için şifreyi temizle (opsiyonel ama iyi)
+      setPassword("");
     } finally {
-      setIsSubmitting(false); // 🔥 EN KRİTİK SATIR
+      setIsSubmitting(false);
     }
   };
 

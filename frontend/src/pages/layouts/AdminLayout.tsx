@@ -9,6 +9,7 @@ const AdminLayout = () => {
     { name: "Öğrenci Atama", path: "/admin/students" },
     { name: "Danışman Ayarları", path: "/admin/teachers" },
     { name: "Form Ayarları", path: "/admin/form" },
+    { name : "Atanan Öğrenci Listesi", path:"/admin/assignedStudents"}
   ];
   return (
     <div className="flex min-h-screen bg-gray-50">

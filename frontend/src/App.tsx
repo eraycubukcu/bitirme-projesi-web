@@ -7,6 +7,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import StudentsPage from "./pages/admin/StudentsPage";
 import TeachersPage from "./pages/admin/TeachersPage";
 import FormSettingsPage from "./pages/admin/FormSettingsPage";
+import AssignedStudentsPage from "./pages/admin/AssignedStudentsPage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="students" element={<StudentsPage />} />
         <Route path="teachers" element={<TeachersPage />} />
         <Route path="form" element={<FormSettingsPage />} />
+        <Route path="assignedStudents" element={<AssignedStudentsPage />}></Route>
       </Route>
     </Routes>
   );

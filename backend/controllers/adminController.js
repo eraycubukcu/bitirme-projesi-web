@@ -97,3 +97,12 @@ export const assignStudents = async (req, res) => {
   }
 };
 
+export const getAssignedStudents = async (req, res) => {
+  try {
+    const students = await Student.find().populate("assignedTeacher");
+
+    res.json(students);
+  } catch (err) {
+    res.status(500).json({ message: "Hata" });
+  }
+};
