@@ -7,6 +7,8 @@ const TeachersPage = () => {
   const [editTeacher, setEditTeacher] = useState<any>(null);
 
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [minQuota, setMinQuota] = useState(0);
   const [maxQuota, setMaxQuota] = useState(0);
 
@@ -24,6 +26,8 @@ const TeachersPage = () => {
   const openAddModal = () => {
     setEditTeacher(null);
     setName("");
+    setUsername("");
+    setPassword("");
     setMinQuota(0);
     setMaxQuota(0);
     setShowModal(true);
@@ -32,14 +36,19 @@ const TeachersPage = () => {
   const openEditModal = (t: any) => {
     setEditTeacher(t);
     setName(t.name);
+    setUsername(t.username);
+    setPassword("");
     setMinQuota(t.minQuota);
     setMaxQuota(t.maxQuota);
     setShowModal(true);
   };
 
   const handleSubmit = async () => {
-    if (!name || maxQuota <= 0) return;
-
+    if (!name || !username || maxQuota <= 0) return;
+    if (!editTeacher && !password) {
+      alert("Yeni hoca için şifre zorunludur");
+      return;
+    }
     if (minQuota > maxQuota) {
       alert("Min, max'tan büyük olamaz");
       return;
@@ -49,26 +58,17 @@ const TeachersPage = () => {
 
     try {
       if (editTeacher) {
-        await api.put(`/teachers/${editTeacher._id}`, {
-          name,
-          minQuota,
-          maxQuota,
-        });
+        const payload: any = { name, username, minQuota, maxQuota };
+        if (password) payload.password = password;
+        await api.put(`/teachers/${editTeacher._id}`, payload);
       } else {
-        await api.post("/teachers", {
-          name,
-          minQuota,
-          maxQuota,
-        });
+        await api.post("/teachers", { name, username, password, minQuota, maxQuota });
       }
 
-      // 🔥 EN KRİTİK SATIR (sorunu çözen)
       await fetchTeachers();
-
       setShowModal(false);
     } catch (err: any) {
-      console.log(err.response?.data);
-      alert("İşlem başarısız");
+      alert(err.response?.data?.message || "İşlem başarısız");
     } finally {
       setLoading(false);
     }
@@ -97,7 +97,6 @@ const TeachersPage = () => {
         Danışman Ekle
       </button>
 
-      {/* LIST */}
       <div className="space-y-3">
         {teachers.map((t) => (
           <div
@@ -106,8 +105,9 @@ const TeachersPage = () => {
           >
             <div>
               <p className="font-medium">{t.name}</p>
-              <p className="text-xs text-gray-500">
-                Min: {t.minQuota} | Max: {t.maxQuota}
+              <p className="text-xs text-gray-400">@{t.username}</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Min: {t.minQuota} | Max: {t.maxQuota} | Mevcut: {t.currentCount}
               </p>
             </div>
 
@@ -130,7 +130,6 @@ const TeachersPage = () => {
         ))}
       </div>
 
-      {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg w-80 space-y-4">
@@ -138,7 +137,7 @@ const TeachersPage = () => {
               {editTeacher ? "Danışman Güncelle" : "Danışman Ekle"}
             </h2>
 
-            {/* NAME */}
+            {/* İsim */}
             <div className="relative">
               <input
                 value={name}
@@ -147,19 +146,50 @@ const TeachersPage = () => {
                 className="peer w-full border rounded px-3 pt-5 pb-2 text-sm
                 focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
               />
-              <label
-                className="absolute left-3 top-2 text-gray-400 text-sm bg-white px-1
-                transition-all
-                peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm
+              <label className="absolute left-3 top-2 text-gray-400 text-sm bg-white px-1
+                transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm
                 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-900
-                peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs
-                pointer-events-none"
-              >
+                peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs pointer-events-none">
                 İsim
               </label>
             </div>
 
-            {/* MIN MAX */}
+            {/* Kullanıcı adı */}
+            <div className="relative">
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder=" "
+                className="peer w-full border rounded px-3 pt-5 pb-2 text-sm
+                focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
+              />
+              <label className="absolute left-3 top-2 text-gray-400 text-sm bg-white px-1
+                transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm
+                peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-900
+                peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs pointer-events-none">
+                Kullanıcı Adı
+              </label>
+            </div>
+
+            {/* Şifre */}
+            <div className="relative">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder=" "
+                className="peer w-full border rounded px-3 pt-5 pb-2 text-sm
+                focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
+              />
+              <label className="absolute left-3 top-2 text-gray-400 text-sm bg-white px-1
+                transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm
+                peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-900
+                peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs pointer-events-none">
+                {editTeacher ? "Şifre (değiştirmek için doldurun)" : "Şifre"}
+              </label>
+            </div>
+
+            {/* Min/Max */}
             <div className="flex gap-2">
               <div className="relative w-1/2">
                 <input
@@ -171,14 +201,10 @@ const TeachersPage = () => {
                   className="peer w-full border rounded px-3 pt-5 pb-2 text-sm
                   focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
                 />
-                <label
-                  className="absolute left-3 top-2 text-gray-400 text-sm bg-white px-1
-                  transition-all
-                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm
+                <label className="absolute left-3 top-2 text-gray-400 text-sm bg-white px-1
+                  transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm
                   peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-900
-                  peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs
-                  pointer-events-none"
-                >
+                  peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs pointer-events-none">
                   Min Öğrenci
                 </label>
               </div>
@@ -193,14 +219,10 @@ const TeachersPage = () => {
                   className="peer w-full border rounded px-3 pt-5 pb-2 text-sm
                   focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
                 />
-                <label
-                  className="absolute left-3 top-2 text-gray-400 text-sm bg-white px-1
-                  transition-all
-                  peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm
+                <label className="absolute left-3 top-2 text-gray-400 text-sm bg-white px-1
+                  transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm
                   peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-900
-                  peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs
-                  pointer-events-none"
-                >
+                  peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs pointer-events-none">
                   Max Öğrenci
                 </label>
               </div>

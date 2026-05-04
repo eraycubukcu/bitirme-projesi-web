@@ -19,6 +19,11 @@ const studentSchema = new mongoose.Schema(
       ref: "Teacher",
       default: null,
     },
+    status: {
+      type: String,
+      enum: ["unassigned", "assigned"],
+      default: "unassigned",
+    },
   },
   { timestamps: true },
 );

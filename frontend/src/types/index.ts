@@ -6,13 +6,17 @@ export interface Field {
 }
 
 export interface FormConfig {
-  isActive: boolean;
   textFields: Field[];
-  description : string;
+  description: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface Teacher {
-  name : string,
-  minQuota: Number,
-  maxQuota: Number,
+  _id: string;
+  name: string;
+  username: string;
+  minQuota: number;
+  maxQuota: number;
+  currentCount: number;
 }

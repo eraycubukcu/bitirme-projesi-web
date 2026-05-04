@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const teacherSchema = new mongoose.Schema(
   {
@@ -6,6 +7,16 @@ const teacherSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
     },
     minQuota: {
       type: Number,
@@ -19,13 +30,31 @@ const teacherSchema = new mongoose.Schema(
     },
     currentCount: {
       type: Number,
-      default : 0
+      default: 0,
+    },
+    hasFinalized: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true },
 );
 
+teacherSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+teacherSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+teacherSchema.set("toJSON", {
+  transform: function (doc, ret) {
+    delete ret.password;
+    return ret;
+  },
+});
+
 const Teacher = mongoose.model("Teacher", teacherSchema);
 export default Teacher;
-
-// Hoca adı, minimum öğrenci , maksimum öğrenci , mevcut öğrenci sayısı
