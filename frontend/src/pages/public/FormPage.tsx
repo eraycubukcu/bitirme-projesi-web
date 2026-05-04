@@ -91,7 +91,7 @@ function FormPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="bg-white w-full max-w-lg rounded-2xl shadow-lg p-8 text-center">
-          <h2 className="text-2xl font-bold text-[#044074] mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Form Gönderildi!
           </h2>
           <p className="text-sm text-gray-400">
@@ -190,9 +190,19 @@ function FormPage() {
                   <span>{teacher.name}</span>
                 </div>
 
-                <div className="flex gap-2">
-                  <button onClick={() => moveUp(index)}>↑</button>
-                  <button onClick={() => moveDown(index)}>↓</button>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => moveUp(index)}
+                    disabled={index === 0}
+                    className="w-7 h-7 flex items-center justify-center border rounded text-gray-500
+                    hover:bg-gray-100 disabled:opacity-25 disabled:cursor-not-allowed transition"
+                  >↑</button>
+                  <button
+                    onClick={() => moveDown(index)}
+                    disabled={index === teachers.length - 1}
+                    className="w-7 h-7 flex items-center justify-center border rounded text-gray-500
+                    hover:bg-gray-100 disabled:opacity-25 disabled:cursor-not-allowed transition"
+                  >↓</button>
                 </div>
               </div>
             ))}

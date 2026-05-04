@@ -19,12 +19,21 @@ const StudentsPage = () => {
   if (!formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
 
   const columns = formConfig.textFields || [];
+  const assignedCount = students.filter((s) => s.assignedTeacher).length;
 
   return (
     <div className="p-6 w-full">
       <h1 className="text-xl font-semibold mb-1">Başvuru Listesi</h1>
       <p className="text-sm text-gray-400 mb-5">
         Toplam {students.length} başvuru
+        {students.length > 0 && (
+          <>
+            <span className="mx-1.5 text-gray-200">·</span>
+            <span className="text-green-600">{assignedCount} atandı</span>
+            <span className="mx-1.5 text-gray-200">·</span>
+            <span className="text-yellow-600">{students.length - assignedCount} bekliyor</span>
+          </>
+        )}
       </p>
 
       <div className="bg-white border rounded-lg overflow-x-auto">

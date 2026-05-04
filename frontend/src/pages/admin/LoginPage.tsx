@@ -109,7 +109,7 @@ const LoginPage = () => {
         </div>
 
         {error && (
-          <p className="text-xs text-red-500 mt-3 animate-pulse">{error}</p>
+          <p className="text-xs text-red-500 mt-3">{error}</p>
         )}
 
         <button

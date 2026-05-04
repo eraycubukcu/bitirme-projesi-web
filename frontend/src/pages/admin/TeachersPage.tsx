@@ -98,30 +98,57 @@ const TeachersPage = () => {
       </button>
 
       <div className="space-y-3">
+        {teachers.length === 0 && (
+          <div className="text-center py-12 text-sm text-gray-400 border rounded-lg">
+            Henüz danışman eklenmedi.
+          </div>
+        )}
         {teachers.map((t) => (
           <div
             key={t._id}
             className="border p-4 rounded flex justify-between items-center"
           >
             <div>
-              <p className="font-medium">{t.name}</p>
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className="font-medium">{t.name}</p>
+                <span
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    t.hasFinalized
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  {t.hasFinalized ? "Onayladı" : "Bekliyor"}
+                </span>
+              </div>
               <p className="text-xs text-gray-400">@{t.username}</p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Min: {t.minQuota} | Max: {t.maxQuota} | Mevcut: {t.currentCount}
-              </p>
+              <div className="flex items-center gap-3 mt-1.5">
+                <p className="text-xs text-gray-500">
+                  {t.currentCount} / {t.maxQuota} öğrenci
+                  <span className="text-gray-300 mx-1">·</span>
+                  Min: {t.minQuota}
+                </p>
+                <div className="w-20 bg-gray-100 rounded-full h-1.5">
+                  <div
+                    className="bg-gray-400 h-1.5 rounded-full transition-all"
+                    style={{
+                      width: `${t.maxQuota > 0 ? Math.min((t.currentCount / t.maxQuota) * 100, 100) : 0}%`,
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 onClick={() => openEditModal(t)}
-                className="text-blue-500 text-sm"
+                className="text-sm text-blue-500 hover:text-blue-700 transition"
               >
                 Düzenle
               </button>
-
               <button
                 onClick={() => handleDelete(t._id)}
-                className="text-red-500 text-sm"
+                className="text-sm text-red-500 hover:text-red-700 transition"
               >
                 Sil
               </button>
