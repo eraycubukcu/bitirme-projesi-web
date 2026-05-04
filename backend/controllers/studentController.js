@@ -17,7 +17,8 @@ export const submitForm = async (req, res) => {
     const start = form.startDate ? new Date(form.startDate) : null;
     const end = form.endDate ? new Date(form.endDate) : null;
 
-    const isOpen = (!start || now >= start) && (!end || now <= end);
+    // Tarih girilmemişse form kapalı
+    const isOpen = (start || end) && (!start || now >= start) && (!end || now <= end);
 
     if (!isOpen) {
       if (start && now < start) {

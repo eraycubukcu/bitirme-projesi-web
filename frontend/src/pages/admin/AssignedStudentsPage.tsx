@@ -5,23 +5,47 @@ const AssignedStudentsPage = () => {
   const [students, setStudents] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [formConfig, setFormConfig] = useState<any>(null);
+  const [fetchError, setFetchError] = useState("");
+  const [selectedTeacher, setSelectedTeacher] = useState<Record<string, string>>({});
+  const [assigning, setAssigning] = useState<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      api.get("/admin/assigned"),
-      api.get("/teachers"),
-      api.get("/form"),
-    ]).then(([sRes, tRes, fRes]) => {
+  const fetchAll = async () => {
+    try {
+      const [sRes, tRes, fRes] = await Promise.all([
+        api.get("/admin/assigned"),
+        api.get("/teachers"),
+        api.get("/form"),
+      ]);
       setStudents(sRes.data);
       setTeachers(tRes.data);
       setFormConfig(fRes.data);
-    });
+    } catch {
+      setFetchError("Veriler yüklenemedi.");
+    }
+  };
+
+  useEffect(() => {
+    fetchAll();
   }, []);
 
-  if (!formConfig) return null;
+  const handleAssign = async (studentId: string) => {
+    const teacherId = selectedTeacher[studentId];
+    if (!teacherId) return;
+    setAssigning(studentId);
+    try {
+      await api.post("/admin/assigned", { studentId, teacherId });
+      await fetchAll();
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Atama başarısız.");
+    } finally {
+      setAssigning(null);
+    }
+  };
+
+  if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
+  if (!formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
 
   const columns: any[] = formConfig.textFields || [];
-
   const assigned = students.filter((s) => s.assignedTeacher);
   const unassigned = students.filter((s) => !s.assignedTeacher);
 
@@ -51,7 +75,6 @@ const AssignedStudentsPage = () => {
             </div>
 
             <div className="bg-white border rounded-lg overflow-x-auto">
-              {/* Header */}
               {columns.length > 0 && (
                 <div
                   className="grid bg-gray-100 text-xs font-medium p-3"
@@ -107,24 +130,25 @@ const AssignedStudentsPage = () => {
               <div
                 className="grid bg-red-50 text-xs font-medium p-3"
                 style={{
-                  gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr)) 220px`,
+                  gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr)) 200px 140px`,
                 }}
               >
                 {columns.map((col: any) => (
                   <div key={col.key}>{col.label}</div>
                 ))}
                 <div>Tercihler</div>
+                <div>Manuel Ata</div>
               </div>
             )}
 
             {unassigned.map((s) => (
               <div
                 key={s._id}
-                className="grid items-start p-3 border-t text-sm"
+                className="grid items-center p-3 border-t text-sm"
                 style={{
                   gridTemplateColumns:
                     columns.length > 0
-                      ? `repeat(${columns.length}, minmax(120px, 1fr)) 220px`
+                      ? `repeat(${columns.length}, minmax(120px, 1fr)) 200px 140px`
                       : "1fr",
                 }}
               >
@@ -137,6 +161,35 @@ const AssignedStudentsPage = () => {
                       {i + 1}. {p?.name || p}
                     </div>
                   ))}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <select
+                    value={selectedTeacher[s._id] || ""}
+                    onChange={(e) =>
+                      setSelectedTeacher((prev) => ({
+                        ...prev,
+                        [s._id]: e.target.value,
+                      }))
+                    }
+                    className="border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900"
+                  >
+                    <option value="">Hoca seç...</option>
+                    {teachers
+                      .filter((t) => t.currentCount < t.maxQuota)
+                      .map((t) => (
+                        <option key={t._id} value={t._id}>
+                          {t.name} ({t.currentCount}/{t.maxQuota})
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    onClick={() => handleAssign(s._id)}
+                    disabled={!selectedTeacher[s._id] || assigning === s._id}
+                    className="text-xs px-2 py-1 bg-gray-900 text-white rounded
+                    disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black transition"
+                  >
+                    {assigning === s._id ? "Atanıyor..." : "Ata"}
+                  </button>
                 </div>
               </div>
             ))}

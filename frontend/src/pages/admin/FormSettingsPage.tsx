@@ -52,12 +52,18 @@ const FormSettingsPage = () => {
   const [endInput, setEndInput] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [fetchError, setFetchError] = useState("");
+
   const fetchForm = async () => {
-    const res = await api.get("/form");
-    const data = res.data;
-    setForm(data);
-    setStartInput(toLocalInput(data.startDate || ""));
-    setEndInput(toLocalInput(data.endDate || ""));
+    try {
+      const res = await api.get("/form");
+      const data = res.data;
+      setForm(data);
+      setStartInput(toLocalInput(data.startDate || ""));
+      setEndInput(toLocalInput(data.endDate || ""));
+    } catch {
+      setFetchError("Form ayarları yüklenemedi.");
+    }
   };
 
   useEffect(() => {
@@ -130,6 +136,8 @@ const FormSettingsPage = () => {
       setSaving(false);
     }
   };
+
+  if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
 
   return (
     <div className="max-w-3xl mx-auto p-6">

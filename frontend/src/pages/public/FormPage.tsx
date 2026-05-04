@@ -12,19 +12,26 @@ function FormPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const formRes = await api.get("/form");
-      const teacherRes = await api.get("/teachers");
-      setForm(formRes.data);
-      setTeachers(teacherRes.data);
+      try {
+        const formRes = await api.get("/form");
+        const teacherRes = await api.get("/teachers");
+        setForm(formRes.data);
+        setTeachers(teacherRes.data);
+      } catch {
+        setError("Veriler yüklenemedi. Lütfen sayfayı yenileyin.");
+      }
     };
     fetchData();
   }, []);
 
-  // 🔥 FORM GELMEDEN HİÇBİR ŞEY YAPMA
   if (!form) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-gray-500 text-sm animate-pulse">Yükleniyor...</p>
+        {error ? (
+          <p className="text-red-500 text-sm">{error}</p>
+        ) : (
+          <p className="text-gray-500 text-sm animate-pulse">Yükleniyor...</p>
+        )}
       </div>
     );
   }
@@ -33,7 +40,9 @@ function FormPage() {
   const start = form.startDate ? new Date(form.startDate) : null;
   const end = form.endDate ? new Date(form.endDate) : null;
 
+  // Tarih girilmemişse form kapalı (backend ile aynı kural)
   const isFormOpen =
+    !!(start || end) &&
     (!start || now >= start) &&
     (!end || now <= end);
 

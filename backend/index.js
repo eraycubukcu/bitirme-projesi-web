@@ -11,11 +11,9 @@ const app = express();
 dotenv.config();
 connectDB();
 app.use(express.json());
-
-const PORT = process.env.PORT | 5000;
-
-app.use(express.json());
 app.use(cors());
+
+const PORT = process.env.PORT || 5000;
 app.use("/api/admin", adminRoutes);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/form", formRoutes);

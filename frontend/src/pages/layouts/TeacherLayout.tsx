@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 
 const TeacherLayout = () => {
   return (
@@ -8,12 +8,12 @@ const TeacherLayout = () => {
         <p className="text-xs text-gray-400 mb-6">Danışman Sistemi</p>
 
         <nav className="space-y-2 flex-1">
-          <a
-            href="/teacher/students"
+          <Link
+            to="/teacher/students"
             className="block px-3 py-2 rounded-lg text-sm bg-gray-900 text-white"
           >
             Öğrenci Onay Listesi
-          </a>
+          </Link>
         </nav>
 
         <button

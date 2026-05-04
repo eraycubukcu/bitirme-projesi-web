@@ -23,8 +23,16 @@ const Dashboard = () => {
   const [data, setData] = useState<any>(null);
   const [cascading, setCascading] = useState(false);
 
-  const fetchData = () =>
-    api.get("/admin/dashboard").then((res) => setData(res.data));
+  const [fetchError, setFetchError] = useState("");
+
+  const fetchData = async () => {
+    try {
+      const res = await api.get("/admin/dashboard");
+      setData(res.data);
+    } catch {
+      setFetchError("Dashboard verisi yüklenemedi.");
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -53,6 +61,7 @@ const Dashboard = () => {
     }
   };
 
+  if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
   if (!data) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
 
   const {

@@ -4,17 +4,19 @@ import api from "../../services/api";
 const StudentsPage = () => {
   const [students, setStudents] = useState<any[]>([]);
   const [formConfig, setFormConfig] = useState<any>(null);
+  const [fetchError, setFetchError] = useState("");
 
   useEffect(() => {
-    Promise.all([api.get("/students"), api.get("/form")]).then(
-      ([sRes, fRes]) => {
+    Promise.all([api.get("/students"), api.get("/form")])
+      .then(([sRes, fRes]) => {
         setStudents(sRes.data);
         setFormConfig(fRes.data);
-      },
-    );
+      })
+      .catch(() => setFetchError("Veriler yüklenemedi."));
   }, []);
 
-  if (!formConfig) return null;
+  if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
+  if (!formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
 
   const columns = formConfig.textFields || [];
 
