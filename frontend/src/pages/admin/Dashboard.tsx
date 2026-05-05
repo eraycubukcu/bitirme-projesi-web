@@ -200,8 +200,18 @@ const Dashboard = () => {
 
           {/* Cascade durumu veya butonu */}
           {allFinalized ? (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-xs">
-              Tüm hocalar onayladı. Otomatik atama gerçekleştirildi.
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-xs space-y-1">
+              <p className="text-green-700">
+                Tüm hocalar onayladı. Otomatik atama gerçekleştirildi.
+              </p>
+              {unassignedCount > 0 && (
+                <p className="text-orange-600">
+                  {unassignedCount} öğrenci atanamadı (kapasite yetersiz).{" "}
+                  <Link to="/admin/assignedStudents" className="underline">
+                    Manuel atama yapın →
+                  </Link>
+                </p>
+              )}
             </div>
           ) : (
             <div className="flex items-center justify-between pt-3 border-t">

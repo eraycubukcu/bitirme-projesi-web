@@ -14,7 +14,6 @@ const StudentApprovalPage = () => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [resultMsg, setResultMsg] = useState("");
-  const [allDone, setAllDone] = useState(false);
   const [fetchError, setFetchError] = useState("");
 
   const fetchData = async () => {
@@ -67,7 +66,6 @@ const StudentApprovalPage = () => {
         approvedStudentIds: Array.from(selectedIds),
       });
       setResultMsg(res.data.message);
-      setAllDone(res.data.allFinalized);
       setSelectedIds(new Set());
       // Güncel veriyi çek
       await fetchData();
