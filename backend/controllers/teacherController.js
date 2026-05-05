@@ -187,6 +187,13 @@ export const getTeachers = async (req, res) => {
 
 export const deleteTeacher = async (req, res) => {
   try {
+    const assignedCount = await Student.countDocuments({ assignedTeacher: req.params.id });
+    if (assignedCount > 0) {
+      return res.status(400).json({
+        message: `Bu hocaya atanmış ${assignedCount} öğrenci var. Önce öğrencileri yeniden atayın.`,
+      });
+    }
+
     const teacher = await Teacher.findByIdAndDelete(req.params.id);
     if (!teacher) {
       return res.status(400).json({ message: "Hoca bulunamadı" });
@@ -213,6 +220,12 @@ export const updateTeacher = async (req, res) => {
     if (newMin > newMax) {
       return res.status(400).json({
         message: "Minimum değer maksimum değerden büyük olamaz.",
+      });
+    }
+
+    if (newMax < teacher.currentCount) {
+      return res.status(400).json({
+        message: `Maksimum kontenjan mevcut öğrenci sayısından (${teacher.currentCount}) küçük olamaz.`,
       });
     }
 

@@ -1,15 +1,22 @@
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const AdminLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const menu = [
-    { name: "Dashboard", path: "/admin/dashboard" },
-    { name: "Başvuru Listesi", path: "/admin/students" },
-    { name: "Danışman Ayarları", path: "/admin/teachers" },
-    { name: "Form Ayarları", path: "/admin/form" },
-    { name: "Atama Sonuçları", path: "/admin/assignedStudents" },
+    { name: "Dashboard",        path: "/admin/dashboard" },
+    { name: "Başvuru Listesi",  path: "/admin/students" },
+    { name: "Danışman Ayarları",path: "/admin/teachers" },
+    { name: "Form Ayarları",    path: "/admin/form" },
+    { name: "Atama Sonuçları",  path: "/admin/assignedStudents" },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/admin/login", { replace: true });
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -35,12 +42,8 @@ const AdminLayout = () => {
         </nav>
 
         <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            window.location.href = "/admin/login";
-          }}
-          className="text-sm text-red-500"
+          onClick={handleLogout}
+          className="text-sm text-red-500 hover:text-red-700 transition text-left"
         >
           Çıkış Yap
         </button>

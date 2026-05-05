@@ -1,6 +1,15 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const TeacherLayout = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/admin/login", { replace: true });
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <div className="w-64 bg-white border-r p-5 fixed top-0 left-0 h-screen flex flex-col">
@@ -10,19 +19,20 @@ const TeacherLayout = () => {
         <nav className="space-y-2 flex-1">
           <Link
             to="/teacher/students"
-            className="block px-3 py-2 rounded-lg text-sm bg-gray-900 text-white"
+            className={`block px-3 py-2 rounded-lg text-sm transition
+            ${
+              location.pathname === "/teacher/students"
+                ? "bg-gray-900 text-white"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
           >
             Öğrenci Onay Listesi
           </Link>
         </nav>
 
         <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            window.location.href = "/admin/login";
-          }}
-          className="text-sm text-red-500"
+          onClick={handleLogout}
+          className="text-sm text-red-500 hover:text-red-700 transition text-left"
         >
           Çıkış Yap
         </button>

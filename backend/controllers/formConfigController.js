@@ -18,6 +18,10 @@ export const updateForm = async (req, res) => {
   try {
     const { textFields, description, startDate, endDate } = req.body;
 
+    if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ message: "Kapanış tarihi açılış tarihinden sonra olmalıdır." });
+    }
+
     let form = await FormConfig.findOne();
 
     if (!form) {

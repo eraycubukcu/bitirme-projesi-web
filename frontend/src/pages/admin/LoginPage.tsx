@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [role, setRole] = useState<"admin" | "teacher">("admin");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -10,6 +12,11 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     if (isSubmitting) return;
+
+    if (!username.trim() || !password) {
+      setError("Kullanıcı adı ve şifre zorunludur.");
+      return;
+    }
 
     setError("");
     setIsSubmitting(true);
@@ -21,10 +28,7 @@ const LoginPage = () => {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
 
-      setTimeout(() => {
-        window.location.href =
-          role === "admin" ? "/admin/dashboard" : "/teacher/students";
-      }, 400);
+      navigate(role === "admin" ? "/admin/dashboard" : "/teacher/students", { replace: true });
     } catch (err: any) {
       setError(err.response?.data?.message || "Giriş başarısız.");
       setPassword("");
@@ -72,6 +76,7 @@ const LoginPage = () => {
               disabled={isSubmitting}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleLogin()}
               placeholder=" "
               className="peer w-full border border-gray-300 rounded-lg px-3 pt-5 pb-2 text-sm
               focus:outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900
