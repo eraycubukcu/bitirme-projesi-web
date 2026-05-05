@@ -60,14 +60,32 @@ function FormPage() {
     setTeachers(updated);
   };
 
+  const validateFields = (): string => {
+    for (const field of form.textFields) {
+      const value = (formData[field.key] || "").trim();
+      if (field.required && !value) return `"${field.label}" alanı boş bırakılamaz.`;
+      if (value) {
+        if (field.fieldType === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+          return `"${field.label}" geçerli bir e-posta adresi olmalıdır.`;
+        if (field.fieldType === "phone") {
+          const digits = value.replace(/[\s\-().+]/g, "");
+          if (!/^\d+$/.test(digits) || digits.length < 7)
+            return `"${field.label}" geçerli bir telefon numarası olmalıdır.`;
+        }
+        if (field.fieldType === "number" && !/^\d+$/.test(value))
+          return `"${field.label}" yalnızca rakam içermelidir.`;
+      }
+    }
+    return "";
+  };
+
   const handleSubmit = async () => {
     if (isSubmitting) return;
 
-    for (const field of form.textFields) {
-      if (field.required && !formData[field.key]?.trim()) {
-        setError(`"${field.label}" alanı boş bırakılamaz.`);
-        return;
-      }
+    const validationError = validateFields();
+    if (validationError) {
+      setError(validationError);
+      return;
     }
 
     setError("");
@@ -157,16 +175,36 @@ function FormPage() {
             <div key={field.key}>
               <label className="text-sm text-gray-500">
                 {field.label}
+                {field.required && <span className="text-red-400 ml-0.5">*</span>}
               </label>
 
               <input
-                type="text"
+                type={
+                  field.fieldType === "email" ? "email" :
+                  field.fieldType === "phone" ? "tel" :
+                  field.fieldType === "number" ? "text" :
+                  "text"
+                }
+                inputMode={
+                  field.fieldType === "phone" || field.fieldType === "number"
+                    ? "numeric"
+                    : undefined
+                }
                 value={formData[field.key] || ""}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    [field.key]: e.target.value,
-                  }))
+                onChange={(e) => {
+                  let val = e.target.value;
+                  if (field.fieldType === "phone")
+                    val = val.replace(/[^\d\s\-().+]/g, "");
+                  if (field.fieldType === "number")
+                    val = val.replace(/\D/g, "");
+                  setFormData((prev) => ({ ...prev, [field.key]: val }));
+                  if (error) setError("");
+                }}
+                placeholder={
+                  field.fieldType === "email" ? "ornek@mail.com" :
+                  field.fieldType === "phone" ? "05xx xxx xx xx" :
+                  field.fieldType === "number" ? "Yalnızca rakam" :
+                  ""
                 }
                 className="w-full mt-1 border-b py-2 text-sm focus:outline-none focus:border-gray-900"
               />

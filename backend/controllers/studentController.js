@@ -27,10 +27,30 @@ export const submitForm = async (req, res) => {
       return res.status(403).json({ message: "Başvuru süresi sona erdi." });
     }
 
-    // Zorunlu alanlar doldurulmuş mu
-    for (let field of form.textFields) {
-      if (field.required && !formData[field.key]?.toString().trim()) {
-        return res.status(400).json({ message: `${field.label} zorunlu` });
+    // Alan doğrulaması
+    for (const field of form.textFields) {
+      const value = formData[field.key]?.toString().trim() || "";
+
+      if (field.required && !value) {
+        return res.status(400).json({ message: `"${field.label}" alanı boş bırakılamaz.` });
+      }
+
+      if (value) {
+        if (field.fieldType === "email") {
+          const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRe.test(value)) {
+            return res.status(400).json({ message: `"${field.label}" geçerli bir e-posta adresi olmalıdır.` });
+          }
+        } else if (field.fieldType === "phone") {
+          const digits = value.replace(/[\s\-().+]/g, "");
+          if (!/^\d+$/.test(digits) || digits.length < 7) {
+            return res.status(400).json({ message: `"${field.label}" geçerli bir telefon numarası olmalıdır.` });
+          }
+        } else if (field.fieldType === "number") {
+          if (!/^\d+$/.test(value)) {
+            return res.status(400).json({ message: `"${field.label}" yalnızca rakam içermelidir.` });
+          }
+        }
       }
     }
 

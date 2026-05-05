@@ -3,6 +3,7 @@ export interface Field {
   key: string;
   required: boolean;
   fixed?: boolean;
+  fieldType?: "text" | "email" | "phone" | "number";
 }
 
 export interface FormConfig {

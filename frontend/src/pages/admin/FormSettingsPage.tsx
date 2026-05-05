@@ -54,6 +54,7 @@ const FormSettingsPage = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [newRequired, setNewRequired] = useState(false);
+  const [newFieldType, setNewFieldType] = useState("text");
 
   const fetchForm = async () => {
     try {
@@ -91,6 +92,7 @@ const FormSettingsPage = () => {
   const openAddModal = () => {
     setNewLabel("");
     setNewRequired(false);
+    setNewFieldType("text");
     setShowAddModal(true);
   };
 
@@ -100,7 +102,7 @@ const FormSettingsPage = () => {
       ...prev,
       textFields: [
         ...prev.textFields,
-        { label: newLabel.trim(), key: generateKey(newLabel.trim()), required: newRequired, fixed: false },
+        { label: newLabel.trim(), key: generateKey(newLabel.trim()), required: newRequired, fixed: false, fieldType: newFieldType },
       ],
     }));
     markDirty();
@@ -375,15 +377,38 @@ const FormSettingsPage = () => {
                   </div>
                 </div>
 
-                <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={f.required}
-                    onChange={(e) => updateField(i, "required", e.target.checked)}
-                    className="accent-gray-900"
-                  />
-                  Zorunlu alan
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={f.required}
+                      disabled={f.fixed}
+                      onChange={(e) => updateField(i, "required", e.target.checked)}
+                      className="accent-gray-900"
+                    />
+                    Zorunlu alan
+                  </label>
+                  {!f.fixed && (
+                    <select
+                      value={f.fieldType || "text"}
+                      onChange={(e) => { updateField(i, "fieldType", e.target.value); }}
+                      className="text-xs border rounded-lg px-2 py-1 bg-white
+                      focus:outline-none focus:ring-1 focus:ring-gray-900 text-gray-500"
+                    >
+                      <option value="text">Metin</option>
+                      <option value="email">E-posta</option>
+                      <option value="phone">Telefon</option>
+                      <option value="number">Sayı</option>
+                    </select>
+                  )}
+                  {f.fixed && f.fieldType && f.fieldType !== "text" && (
+                    <span className="text-xs text-gray-400">{
+                      f.fieldType === "email" ? "E-posta" :
+                      f.fieldType === "phone" ? "Telefon" :
+                      f.fieldType === "number" ? "Sayı" : "Metin"
+                    }</span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -438,6 +463,21 @@ const FormSettingsPage = () => {
                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none
                 focus:ring-1 focus:ring-gray-900"
               />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500 block mb-1">Alan Tipi</label>
+              <select
+                value={newFieldType}
+                onChange={(e) => setNewFieldType(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm bg-white
+                focus:outline-none focus:ring-1 focus:ring-gray-900 text-gray-700"
+              >
+                <option value="text">Metin</option>
+                <option value="email">E-posta</option>
+                <option value="phone">Telefon</option>
+                <option value="number">Sayı</option>
+              </select>
             </div>
 
             <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">

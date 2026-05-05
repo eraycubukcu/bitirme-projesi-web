@@ -18,6 +18,11 @@ const fieldSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  fieldType: {
+    type: String,
+    enum: ["text", "email", "phone", "number"],
+    default: "text",
+  },
 });
 
 const formConfigSchema = new mongoose.Schema(
