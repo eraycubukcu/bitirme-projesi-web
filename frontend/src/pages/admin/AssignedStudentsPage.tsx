@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
 import api from "../../services/api";
 
 const AssignedStudentsPage = () => {
@@ -42,6 +43,38 @@ const AssignedStudentsPage = () => {
     }
   };
 
+  const exportTeacherExcel = (teacher: any, group: any[]) => {
+    const columns: any[] = formConfig?.textFields || [];
+
+    // Başlık satırı: form alanları
+    const header = columns.map((col: any) => col.label);
+
+    // Veri satırları
+    const rows = group.map((s) =>
+      columns.map((col: any) => s.formData?.[col.key] ?? ""),
+    );
+
+    const wsData = [header, ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    // Sütun genişliklerini otomatik ayarla
+    ws["!cols"] = header.map((_: any, i: number) => ({
+      wch: Math.max(
+        header[i].length,
+        ...rows.map((r) => String(r[i] ?? "").length),
+        12,
+      ),
+    }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, teacher.name.slice(0, 31));
+
+    const safeFileName = teacher.name
+      .replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ _-]/g, "")
+      .trim();
+    XLSX.writeFile(wb, `${safeFileName}_ogrenciler.xlsx`);
+  };
+
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
   if (!formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
 
@@ -67,11 +100,20 @@ const AssignedStudentsPage = () => {
 
         return (
           <div key={teacher._id} className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-base font-semibold">{teacher.name}</h2>
-              <span className="text-xs text-gray-400">
-                {group.length} / {teacher.maxQuota} öğrenci
-              </span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <h2 className="text-base font-semibold">{teacher.name}</h2>
+                <span className="text-xs text-gray-400">
+                  {group.length} / {teacher.maxQuota} öğrenci
+                </span>
+              </div>
+              <button
+                onClick={() => exportTeacherExcel(teacher, group)}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-300
+                rounded-lg text-gray-600 hover:bg-gray-50 transition"
+              >
+                ↓ Excel İndir
+              </button>
             </div>
 
             <div className="bg-white border rounded-lg overflow-x-auto">
