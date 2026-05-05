@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import {
   adminLogin,
   getDashboard,
@@ -10,7 +11,15 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/login", adminLogin);
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { message: "Çok fazla giriş denemesi. 15 dakika sonra tekrar deneyin." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.post("/login", loginLimiter, adminLogin);
 router.get("/dashboard", protect, getDashboard);
 router.post("/assigned", protect, assignStudents);
 router.get("/assigned", protect, getAssignedStudents);

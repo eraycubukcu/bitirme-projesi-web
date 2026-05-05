@@ -6,6 +6,10 @@ export const submitForm = async (req, res) => {
   try {
     const { formData, preferences } = req.body;
 
+    if (!formData || typeof formData !== "object" || !Array.isArray(preferences)) {
+      return res.status(400).json({ message: "Geçersiz istek." });
+    }
+
     const form = await FormConfig.findOne();
 
     if (!form) {

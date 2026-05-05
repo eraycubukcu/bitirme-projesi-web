@@ -9,14 +9,15 @@ export const adminLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const admin = await Admin.findOne({ username });
-    if (!admin) {
-      return res.status(400).json({ message: "Kullanıcı bulunamadı." });
+    if (!username?.trim() || !password) {
+      return res.status(400).json({ message: "Kullanıcı adı ve şifre zorunludur." });
     }
 
-    const isMatch = await admin.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Şifre yanlış." });
+    const admin = await Admin.findOne({ username: username.trim() });
+    const isMatch = admin ? await admin.comparePassword(password) : false;
+
+    if (!admin || !isMatch) {
+      return res.status(401).json({ message: "Kullanıcı adı veya şifre hatalı." });
     }
 
     const token = jwt.sign(

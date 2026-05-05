@@ -32,14 +32,15 @@ export const teacherLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const teacher = await Teacher.findOne({ username });
-    if (!teacher) {
-      return res.status(400).json({ message: "Kullanıcı bulunamadı." });
+    if (!username?.trim() || !password) {
+      return res.status(400).json({ message: "Kullanıcı adı ve şifre zorunludur." });
     }
 
-    const isMatch = await teacher.comparePassword(password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Şifre yanlış." });
+    const teacher = await Teacher.findOne({ username: username.trim() });
+    const isMatch = teacher ? await teacher.comparePassword(password) : false;
+
+    if (!teacher || !isMatch) {
+      return res.status(401).json({ message: "Kullanıcı adı veya şifre hatalı." });
     }
 
     const token = jwt.sign(
