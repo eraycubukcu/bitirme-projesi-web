@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import * as XLSX from "xlsx";
 import api from "../../services/api";
 
 const StudentsPage = () => {
@@ -90,6 +91,36 @@ const StudentsPage = () => {
     return list;
   }, [students, search, filterTeacher, sortKey, sortDir]);
 
+  const exportExcel = () => {
+    const header = [
+      ...columns.map((c: any) => c.label),
+      "Tercihler",
+      "Danışman",
+    ];
+
+    const rows = processed.map((s) => [
+      ...columns.map((c: any) => s.formData?.[c.key] ?? ""),
+      (s.preferences || []).map((p: any, i: number) => `${i + 1}. ${p.name}`).join(" / "),
+      s.assignedTeacher?.name ?? "Atanmamış",
+    ]);
+
+    const wsData = [header, ...rows];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = header.map((_: any, i: number) => ({
+      wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 10),
+    }));
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Başvurular");
+
+    const suffix = filterTeacher === "unassigned"
+      ? "_atanmamis"
+      : filterTeacher
+      ? `_${teachers.find((t) => t._id === filterTeacher)?.name ?? "hoca"}`
+      : "";
+    XLSX.writeFile(wb, `basvurular${suffix}.xlsx`);
+  };
+
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
   if (!formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
 
@@ -119,13 +150,27 @@ const StudentsPage = () => {
             )}
           </p>
         </div>
-        <button
-          onClick={fetchAll}
-          className="flex items-center gap-1.5 text-sm text-gray-500 border rounded-lg
-          px-3 py-1.5 hover:bg-gray-50 hover:text-gray-700 transition"
-        >
-          <span className="text-base leading-none">↻</span> Yenile
-        </button>
+        <div className="flex items-center gap-2">
+          {processed.length > 0 && (
+            <button
+              onClick={exportExcel}
+              className="flex items-center gap-1.5 text-sm text-gray-600 border rounded-lg
+              px-3 py-1.5 hover:bg-gray-50 transition"
+            >
+              ↓ Excel İndir
+              {(search || filterTeacher) && (
+                <span className="text-xs text-gray-400">({processed.length})</span>
+              )}
+            </button>
+          )}
+          <button
+            onClick={fetchAll}
+            className="flex items-center gap-1.5 text-sm text-gray-500 border rounded-lg
+            px-3 py-1.5 hover:bg-gray-50 hover:text-gray-700 transition"
+          >
+            <span className="text-base leading-none">↻</span> Yenile
+          </button>
+        </div>
       </div>
 
       {/* ── Filtre / Arama araç çubuğu ───────────────────────────── */}
