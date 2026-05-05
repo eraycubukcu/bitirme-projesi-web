@@ -51,7 +51,7 @@ const FormSettingsPage = () => {
   const [startInput, setStartInput] = useState("");
   const [endInput, setEndInput] = useState("");
   const [saving, setSaving] = useState(false);
-
+  const [loaded, setLoaded] = useState(false);
   const [fetchError, setFetchError] = useState("");
 
   const fetchForm = async () => {
@@ -61,8 +61,13 @@ const FormSettingsPage = () => {
       setForm(data);
       setStartInput(toLocalInput(data.startDate || ""));
       setEndInput(toLocalInput(data.endDate || ""));
-    } catch {
-      setFetchError("Form ayarları yüklenemedi.");
+    } catch (err: any) {
+      // 404 → form config henüz oluşturulmamış, boş form göster
+      if (err.response?.status !== 404) {
+        setFetchError("Form ayarları yüklenemedi.");
+      }
+    } finally {
+      setLoaded(true);
     }
   };
 
@@ -138,6 +143,7 @@ const FormSettingsPage = () => {
   };
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
+  if (!loaded) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
 
   return (
     <div className="max-w-3xl mx-auto p-6">

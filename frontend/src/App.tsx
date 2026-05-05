@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import FormPage from "./pages/public/FormPage";
 import LoginPage from "./pages/admin/LoginPage";
 import AdminLayout from "./pages/layouts/AdminLayout";
@@ -27,6 +27,7 @@ function App() {
           </ProtectedRoute>
         }
       >
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="students" element={<StudentsPage />} />
         <Route path="teachers" element={<TeachersPage />} />
@@ -43,6 +44,7 @@ function App() {
           </ProtectedRoute>
         }
       >
+        <Route index element={<Navigate to="students" replace />} />
         <Route path="students" element={<StudentApprovalPage />} />
       </Route>
     </Routes>

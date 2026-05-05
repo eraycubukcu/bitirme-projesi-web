@@ -14,9 +14,15 @@ const TeachersPage = () => {
 
   const [loading, setLoading] = useState(false);
 
+  const [fetchError, setFetchError] = useState("");
+
   const fetchTeachers = async () => {
-    const res = await api.get("/teachers");
-    setTeachers(res.data);
+    try {
+      const res = await api.get("/teachers");
+      setTeachers(res.data);
+    } catch {
+      setFetchError("Danışmanlar yüklenemedi.");
+    }
   };
 
   useEffect(() => {
@@ -85,6 +91,8 @@ const TeachersPage = () => {
       alert("Silinemedi");
     }
   };
+
+  if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
 
   return (
     <div className="p-6 w-full">

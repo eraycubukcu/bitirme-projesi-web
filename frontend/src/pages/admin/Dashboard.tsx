@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../../services/api";
 
 const StatCard = ({
@@ -109,12 +110,12 @@ const Dashboard = () => {
             <p className="text-xs text-gray-400">Form ayarları yapılmamış</p>
           )}
         </div>
-        <a
-          href="/admin/form"
+        <Link
+          to="/admin/form"
           className="text-xs text-gray-500 underline hover:text-gray-700"
         >
           Ayarla
-        </a>
+        </Link>
       </div>
 
       {/* İstatistikler */}
