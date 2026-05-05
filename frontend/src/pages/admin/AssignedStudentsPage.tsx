@@ -9,6 +9,7 @@ const AssignedStudentsPage = () => {
   const [fetchError, setFetchError] = useState("");
   const [selectedTeacher, setSelectedTeacher] = useState<Record<string, string>>({});
   const [assigning, setAssigning] = useState<string | null>(null);
+  const [assignError, setAssignError] = useState("");
 
   const fetchAll = async () => {
     try {
@@ -37,7 +38,7 @@ const AssignedStudentsPage = () => {
       await api.post("/admin/assigned", { studentId, teacherId });
       await fetchAll();
     } catch (err: any) {
-      alert(err.response?.data?.message || "Atama başarısız.");
+      setAssignError(err.response?.data?.message || "Atama başarısız.");
     } finally {
       setAssigning(null);
     }
@@ -83,12 +84,18 @@ const AssignedStudentsPage = () => {
   const unassigned = students.filter((s) => !s.assignedTeacher);
 
   return (
-    <div className="p-6 w-full">
+    <div className="p-4 sm:p-6 w-full">
       <h1 className="text-xl font-semibold mb-1">Atama Sonuçları</h1>
-      <p className="text-sm text-gray-400 mb-6">
-        Atanan: {assigned.length} &nbsp;|&nbsp; Atanmayan: {unassigned.length}{" "}
-        &nbsp;|&nbsp; Toplam: {students.length}
+      <p className="text-sm text-gray-400 mb-4">
+        Atanan: {assigned.length} · Atanmayan: {unassigned.length} · Toplam: {students.length}
       </p>
+
+      {assignError && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center justify-between">
+          <span>{assignError}</span>
+          <button onClick={() => setAssignError("")} className="ml-3 text-red-400 hover:text-red-600">✕</button>
+        </div>
+      )}
 
       {/* Hocaya göre gruplar */}
       {teachers.map((teacher) => {
@@ -117,41 +124,37 @@ const AssignedStudentsPage = () => {
             </div>
 
             <div className="bg-white border rounded-lg overflow-x-auto">
-              {columns.length > 0 && (
-                <div
-                  className="grid bg-gray-100 text-xs font-medium p-3"
-                  style={{
-                    gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr))`,
-                  }}
-                >
-                  {columns.map((col: any) => (
-                    <div key={col.key}>{col.label}</div>
-                  ))}
-                </div>
-              )}
-
-              {group.map((s) => (
-                <div
-                  key={s._id}
-                  className="grid items-center p-3 border-t text-sm"
-                  style={{
-                    gridTemplateColumns:
-                      columns.length > 0
+              <div className="min-w-max">
+                {columns.length > 0 && (
+                  <div
+                    className="grid bg-gray-100 text-xs font-medium p-3"
+                    style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr))` }}
+                  >
+                    {columns.map((col: any) => (
+                      <div key={col.key}>{col.label}</div>
+                    ))}
+                  </div>
+                )}
+                {group.map((s) => (
+                  <div
+                    key={s._id}
+                    className="grid items-center p-3 border-t text-sm"
+                    style={{
+                      gridTemplateColumns: columns.length > 0
                         ? `repeat(${columns.length}, minmax(120px, 1fr))`
                         : "1fr",
-                  }}
-                >
-                  {columns.length > 0
-                    ? columns.map((col: any) => (
-                        <div key={col.key}>{s.formData?.[col.key] || "-"}</div>
-                      ))
-                    : Object.values(s.formData || {}).map((val: any, i) => (
-                        <span key={i} className="mr-4">
-                          {val}
-                        </span>
-                      ))}
-                </div>
-              ))}
+                    }}
+                  >
+                    {columns.length > 0
+                      ? columns.map((col: any) => (
+                          <div key={col.key}>{s.formData?.[col.key] || "-"}</div>
+                        ))
+                      : Object.values(s.formData || {}).map((val: any, i) => (
+                          <span key={i} className="mr-4">{val}</span>
+                        ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         );
@@ -168,73 +171,66 @@ const AssignedStudentsPage = () => {
           </div>
 
           <div className="bg-white border border-red-100 rounded-lg overflow-x-auto">
-            {columns.length > 0 && (
-              <div
-                className="grid bg-red-50 text-xs font-medium p-3"
-                style={{
-                  gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr)) 200px 140px`,
-                }}
-              >
-                {columns.map((col: any) => (
-                  <div key={col.key}>{col.label}</div>
-                ))}
-                <div>Tercihler</div>
-                <div>Manuel Ata</div>
-              </div>
-            )}
-
-            {unassigned.map((s) => (
-              <div
-                key={s._id}
-                className="grid items-center p-3 border-t text-sm"
-                style={{
-                  gridTemplateColumns:
-                    columns.length > 0
-                      ? `repeat(${columns.length}, minmax(120px, 1fr)) 200px 140px`
-                      : "1fr",
-                }}
-              >
-                {columns.map((col: any) => (
-                  <div key={col.key}>{s.formData?.[col.key] || "-"}</div>
-                ))}
-                <div className="text-xs text-gray-400 space-y-0.5">
-                  {s.preferences?.map((p: any, i: number) => (
-                    <div key={i}>
-                      {i + 1}. {p?.name || p}
-                    </div>
+            <div className="min-w-max">
+              {columns.length > 0 && (
+                <div
+                  className="grid bg-red-50 text-xs font-medium p-3"
+                  style={{
+                    gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr)) 180px 160px`,
+                  }}
+                >
+                  {columns.map((col: any) => (
+                    <div key={col.key}>{col.label}</div>
                   ))}
+                  <div>Tercihler</div>
+                  <div>Manuel Ata</div>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <select
-                    value={selectedTeacher[s._id] || ""}
-                    onChange={(e) =>
-                      setSelectedTeacher((prev) => ({
-                        ...prev,
-                        [s._id]: e.target.value,
-                      }))
-                    }
-                    className="border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900"
-                  >
-                    <option value="">Hoca seç...</option>
-                    {teachers
-                      .filter((t) => t.currentCount < t.maxQuota)
-                      .map((t) => (
-                        <option key={t._id} value={t._id}>
-                          {t.name} ({t.currentCount}/{t.maxQuota})
-                        </option>
-                      ))}
-                  </select>
-                  <button
-                    onClick={() => handleAssign(s._id)}
-                    disabled={!selectedTeacher[s._id] || assigning === s._id}
-                    className="text-xs px-2 py-1 bg-gray-900 text-white rounded
-                    disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black transition"
-                  >
-                    {assigning === s._id ? "Atanıyor..." : "Ata"}
-                  </button>
+              )}
+              {unassigned.map((s) => (
+                <div
+                  key={s._id}
+                  className="grid items-center p-3 border-t text-sm"
+                  style={{
+                    gridTemplateColumns: columns.length > 0
+                      ? `repeat(${columns.length}, minmax(120px, 1fr)) 180px 160px`
+                      : "1fr",
+                  }}
+                >
+                  {columns.map((col: any) => (
+                    <div key={col.key}>{s.formData?.[col.key] || "-"}</div>
+                  ))}
+                  <div className="text-xs text-gray-400 space-y-0.5">
+                    {s.preferences?.map((p: any, i: number) => (
+                      <div key={i}>{i + 1}. {p?.name || p}</div>
+                    ))}
+                  </div>
+                  <div className="flex flex-col gap-1.5 pr-2">
+                    <select
+                      value={selectedTeacher[s._id] || ""}
+                      onChange={(e) => setSelectedTeacher((prev) => ({ ...prev, [s._id]: e.target.value }))}
+                      className="border rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900"
+                    >
+                      <option value="">Hoca seç...</option>
+                      {teachers
+                        .filter((t) => t.currentCount < t.maxQuota)
+                        .map((t) => (
+                          <option key={t._id} value={t._id}>
+                            {t.name} ({t.currentCount}/{t.maxQuota})
+                          </option>
+                        ))}
+                    </select>
+                    <button
+                      onClick={() => handleAssign(s._id)}
+                      disabled={!selectedTeacher[s._id] || assigning === s._id}
+                      className="text-xs px-2 py-1.5 bg-gray-900 text-white rounded
+                      disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black transition"
+                    >
+                      {assigning === s._id ? "Atanıyor..." : "Ata"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}

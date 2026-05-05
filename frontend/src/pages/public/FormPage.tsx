@@ -149,7 +149,7 @@ function FormPage() {
   // ✅ NORMAL FORM
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
-      <div className="w-full max-w-md bg-white rounded-xl border shadow-sm p-6 sm:p-8">
+      <div className="w-full max-w-md bg-white rounded-xl border shadow-sm p-5 sm:p-8">
         
         <div className="mb-8">
           <h1 className="text-xl font-semibold text-gray-900">
@@ -232,14 +232,14 @@ function FormPage() {
                   <button
                     onClick={() => moveUp(index)}
                     disabled={index === 0}
-                    className="w-7 h-7 flex items-center justify-center border rounded text-gray-500
-                    hover:bg-gray-100 disabled:opacity-25 disabled:cursor-not-allowed transition"
+                    className="w-9 h-9 flex items-center justify-center border rounded-lg text-gray-500
+                    hover:bg-gray-100 disabled:opacity-25 disabled:cursor-not-allowed transition active:scale-95"
                   >↑</button>
                   <button
                     onClick={() => moveDown(index)}
                     disabled={index === teachers.length - 1}
-                    className="w-7 h-7 flex items-center justify-center border rounded text-gray-500
-                    hover:bg-gray-100 disabled:opacity-25 disabled:cursor-not-allowed transition"
+                    className="w-9 h-9 flex items-center justify-center border rounded-lg text-gray-500
+                    hover:bg-gray-100 disabled:opacity-25 disabled:cursor-not-allowed transition active:scale-95"
                   >↓</button>
                 </div>
               </div>

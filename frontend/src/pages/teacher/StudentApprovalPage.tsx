@@ -125,7 +125,7 @@ const StudentApprovalPage = () => {
       </div>
 
       {/* Kontenjan bilgisi */}
-      <div className="flex gap-3 mb-5">
+      <div className="flex flex-wrap gap-2 mb-5">
         {[
           { label: "Bekleyen",         value: students.length },
           { label: "Seçili",           value: selectedIds.size, highlight: true },
@@ -175,6 +175,7 @@ const StudentApprovalPage = () => {
       {students.length > 0 && (
         <>
           <div className="bg-white border rounded-lg overflow-x-auto mb-4">
+           <div className="min-w-max">
             <div
               className="grid bg-gray-100 text-xs font-semibold p-3"
               style={{ gridTemplateColumns: `40px repeat(${columns.length + 1}, minmax(140px,1fr))` }}
@@ -220,6 +221,7 @@ const StudentApprovalPage = () => {
                 </div>
               );
             })}
+           </div>
           </div>
 
           {/* Onay butonu veya inline confirm */}

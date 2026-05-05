@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 const TeacherLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -10,37 +12,75 @@ const TeacherLayout = () => {
     navigate("/admin/login", { replace: true });
   };
 
-  return (
-    <div className="flex min-h-screen bg-gray-50">
-      <div className="w-64 bg-white border-r p-5 fixed top-0 left-0 h-screen flex flex-col">
-        <h1 className="text-lg font-semibold mb-1">Hoca Paneli</h1>
-        <p className="text-xs text-gray-400 mb-6">Danışman Sistemi</p>
-
-        <nav className="space-y-2 flex-1">
-          <Link
-            to="/teacher/students"
-            className={`block px-3 py-2 rounded-lg text-sm transition
-            ${
-              location.pathname === "/teacher/students"
-                ? "bg-gray-900 text-white"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            Öğrenci Onay Listesi
-          </Link>
-        </nav>
-
-        <button
-          onClick={handleLogout}
-          className="text-sm text-red-500 hover:text-red-700 transition text-left"
+  const Sidebar = () => (
+    <div className="flex flex-col h-full p-5">
+      <div className="mb-6">
+        <h1 className="text-lg font-semibold">Hoca Paneli</h1>
+        <p className="text-xs text-gray-400">Danışman Sistemi</p>
+      </div>
+      <nav className="space-y-1 flex-1">
+        <Link
+          to="/teacher/students"
+          onClick={() => setOpen(false)}
+          className={`block px-3 py-2 rounded-lg text-sm transition
+          ${location.pathname === "/teacher/students"
+            ? "bg-gray-900 text-white"
+            : "text-gray-600 hover:bg-gray-100"
+          }`}
         >
-          Çıkış Yap
+          Öğrenci Onay Listesi
+        </Link>
+      </nav>
+      <button
+        onClick={handleLogout}
+        className="text-sm text-red-500 hover:text-red-700 transition text-left pt-4 border-t"
+      >
+        Çıkış Yap
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+
+      {/* ── Mobil üst bar ────────────────────────────────────────── */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b
+        flex items-center px-4 z-40">
+        <button
+          onClick={() => setOpen(true)}
+          className="w-9 h-9 flex flex-col items-center justify-center gap-1.5
+          rounded-lg hover:bg-gray-100 transition"
+          aria-label="Menü"
+        >
+          <span className="w-5 h-0.5 bg-gray-700 rounded" />
+          <span className="w-5 h-0.5 bg-gray-700 rounded" />
+          <span className="w-5 h-0.5 bg-gray-700 rounded" />
         </button>
+        <span className="ml-3 font-semibold text-gray-900">Hoca Paneli</span>
       </div>
 
-      <div className="flex-1 p-6 ml-64">
+      {/* ── Mobil drawer backdrop ─────────────────────────────────── */}
+      {open && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/40 z-40"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* ── Sidebar ──────────────────────────────────────────────── */}
+      <aside
+        className={`fixed top-0 left-0 h-screen w-64 bg-white border-r z-50
+          transition-transform duration-200
+          ${open ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0`}
+      >
+        <Sidebar />
+      </aside>
+
+      {/* ── İçerik ───────────────────────────────────────────────── */}
+      <main className="md:ml-64 pt-14 md:pt-0 min-h-screen">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 };

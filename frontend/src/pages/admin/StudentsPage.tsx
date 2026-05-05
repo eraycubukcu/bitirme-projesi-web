@@ -265,6 +265,7 @@ const StudentsPage = () => {
 
       {/* ── Tablo ────────────────────────────────────────────────── */}
       <div className="bg-white border rounded-xl overflow-x-auto">
+       <div className="min-w-max w-full">
 
         {/* Header */}
         {columns.length > 0 && (
@@ -354,6 +355,7 @@ const StudentsPage = () => {
             </div>
           </div>
         ))}
+       </div>
       </div>
     </div>
   );

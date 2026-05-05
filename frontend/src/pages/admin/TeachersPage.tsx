@@ -211,10 +211,10 @@ const TeachersPage = () => {
       {/* ── Modal ────────────────────────────────────────────────── */}
       {showModal && (
         <div
-          className="fixed inset-0 bg-black/30 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/30 flex items-end sm:items-center justify-center z-50"
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
-          <div className="bg-white p-6 rounded-xl shadow-lg w-80 space-y-4">
+          <div className="bg-white p-5 sm:p-6 rounded-t-2xl sm:rounded-xl shadow-lg w-full sm:w-80 space-y-4 max-h-[90vh] overflow-y-auto">
             <h2 className="font-semibold text-gray-800">
               {editTeacher ? "Danışman Güncelle" : "Danışman Ekle"}
             </h2>

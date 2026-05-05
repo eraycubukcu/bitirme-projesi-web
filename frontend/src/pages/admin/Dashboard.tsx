@@ -66,7 +66,7 @@ const Dashboard = () => {
     d ? new Date(d).toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" }) : "—";
 
   return (
-    <div className="p-6 w-full max-w-3xl">
+    <div className="p-4 sm:p-6 w-full max-w-3xl mx-auto">
 
       {/* ── Başlık ───────────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-8">
@@ -213,8 +213,8 @@ const Dashboard = () => {
                     {t.name}
                   </span>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <div className="hidden sm:flex items-center gap-1.5">
                     <div className="w-16 bg-gray-200 rounded-full h-1">
                       <div
                         className="bg-gray-400 h-1 rounded-full"
@@ -227,8 +227,11 @@ const Dashboard = () => {
                       {t.currentCount}/{t.maxQuota}
                     </span>
                   </div>
+                  <span className="text-xs text-gray-400 sm:hidden">
+                    {t.currentCount}/{t.maxQuota}
+                  </span>
                   <span
-                    className={`text-xs font-medium w-14 text-right ${
+                    className={`text-xs font-medium text-right ${
                       t.hasFinalized ? "text-green-600" : "text-gray-400"
                     }`}
                   >
