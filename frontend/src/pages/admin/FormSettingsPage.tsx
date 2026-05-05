@@ -165,19 +165,48 @@ const FormSettingsPage = () => {
     <div className="max-w-2xl mx-auto p-6">
 
       {/* ── Başlık ───────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Form Ayarları</h1>
           <p className="text-sm text-gray-400 mt-0.5">Başvuru formu içeriği ve tarihleri</p>
         </div>
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            isOpen ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-          }`}
-        >
-          {isOpen ? "Form Açık" : "Form Kapalı"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              isOpen ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+            }`}
+          >
+            {isOpen ? "Form Açık" : "Form Kapalı"}
+          </span>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className={`px-4 py-1.5 rounded-lg font-medium text-sm transition
+            disabled:opacity-50 disabled:cursor-not-allowed
+            ${isDirty
+              ? "bg-gray-900 text-white hover:bg-black"
+              : "bg-gray-100 text-gray-400 cursor-default"
+            }`}
+          >
+            {saving ? "Kaydediliyor..." : isDirty ? "Kaydet" : "Kaydedildi"}
+          </button>
+        </div>
       </div>
+
+      {/* ── Kaydet sonuç mesajları ────────────────────────────────── */}
+      {saveResult === "success" && (
+        <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-700 mb-5">
+          <span>Değişiklikler kaydedildi.</span>
+          <button onClick={() => setSaveResult(null)} className="text-green-400 hover:text-green-600">✕</button>
+        </div>
+      )}
+      {saveResult === "error" && (
+        <div className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 mb-5">
+          <span>Kayıt sırasında hata oluştu. Tekrar deneyin.</span>
+          <button onClick={() => setSaveResult(null)} className="text-red-400 hover:text-red-600">✕</button>
+        </div>
+      )}
+      {!saveResult && <div className="mb-4" />}
 
       {/* ── Açıklama ─────────────────────────────────────────────── */}
       <div className="mb-6">
@@ -409,35 +438,6 @@ const FormSettingsPage = () => {
         </div>
       )}
 
-      {/* ── Kaydet bölümü ────────────────────────────────────────── */}
-      <div className="space-y-3">
-        {/* Sonuç mesajları */}
-        {saveResult === "success" && (
-          <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-700">
-            <span>Değişiklikler kaydedildi.</span>
-            <button onClick={() => setSaveResult(null)} className="text-green-400 hover:text-green-600">✕</button>
-          </div>
-        )}
-        {saveResult === "error" && (
-          <div className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
-            <span>Kayıt sırasında hata oluştu. Tekrar deneyin.</span>
-            <button onClick={() => setSaveResult(null)} className="text-red-400 hover:text-red-600">✕</button>
-          </div>
-        )}
-
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className={`w-full py-3 rounded-xl font-medium text-sm transition
-          disabled:opacity-50 disabled:cursor-not-allowed
-          ${isDirty
-            ? "bg-gray-900 text-white hover:bg-black"
-            : "bg-gray-100 text-gray-400 cursor-default"
-          }`}
-        >
-          {saving ? "Kaydediliyor..." : isDirty ? "Kaydet" : "Kaydedildi"}
-        </button>
-      </div>
     </div>
   );
 };
