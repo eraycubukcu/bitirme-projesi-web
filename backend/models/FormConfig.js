@@ -33,6 +33,10 @@ const formConfigSchema = new mongoose.Schema(
       type: String,
     },
     textFields: [fieldSchema],
+    uniqueField: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true },
 );

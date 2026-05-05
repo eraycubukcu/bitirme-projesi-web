@@ -16,7 +16,7 @@ export const getForm = async (req, res) => {
 
 export const updateForm = async (req, res) => {
   try {
-    const { textFields, description, startDate, endDate } = req.body;
+    const { textFields, description, startDate, endDate, uniqueField } = req.body;
 
     if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
       return res.status(400).json({ message: "Kapanış tarihi açılış tarihinden sonra olmalıdır." });
@@ -25,13 +25,14 @@ export const updateForm = async (req, res) => {
     let form = await FormConfig.findOne();
 
     if (!form) {
-      form = new FormConfig({ textFields, description, startDate, endDate });
+      form = new FormConfig({ textFields, description, startDate, endDate, uniqueField: uniqueField || null });
     } else {
       const fixedFields = form.textFields.filter((f) => f.fixed);
       form.textFields = [...fixedFields, ...textFields.filter((f) => !f.fixed)];
       form.description = description !== undefined ? description : form.description;
       form.startDate = startDate !== undefined ? startDate : form.startDate;
       form.endDate = endDate !== undefined ? endDate : form.endDate;
+      form.uniqueField = uniqueField !== undefined ? (uniqueField || null) : form.uniqueField;
     }
 
     await form.save();

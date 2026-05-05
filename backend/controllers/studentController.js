@@ -52,6 +52,22 @@ export const submitForm = async (req, res) => {
       }
     }
 
+    // Tekrar başvuru kontrolü
+    if (form.uniqueField) {
+      const uniqueValue = formData[form.uniqueField]?.toString().trim();
+      if (uniqueValue) {
+        const existing = await Student.findOne({
+          [`formData.${form.uniqueField}`]: uniqueValue,
+        });
+        if (existing) {
+          const fieldLabel = form.textFields.find((f) => f.key === form.uniqueField)?.label || form.uniqueField;
+          return res.status(400).json({
+            message: `Bu ${fieldLabel} ile daha önce başvuru yapılmış.`,
+          });
+        }
+      }
+    }
+
     const student = await Student.create({ formData, preferences });
 
     res.status(201).json({ message: "Form gönderildi", student });
