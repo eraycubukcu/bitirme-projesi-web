@@ -10,6 +10,8 @@ function FormPage() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => { document.title = "Bitirme Projesi Danışman Seçimi"; }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -72,8 +74,15 @@ function FormPage() {
           if (!/^\d+$/.test(digits) || digits.length < 7)
             return `"${field.label}" geçerli bir telefon numarası olmalıdır.`;
         }
-        if (field.fieldType === "number" && !/^\d+$/.test(value))
+        if (field.key === "gpa") {
+          if (!/^\d\.\d{2}$/.test(value))
+            return `"${field.label}" X.XX formatında girilmelidir (örn: 2.40).`;
+          const num = parseFloat(value);
+          if (num < 0 || num > 4)
+            return `"${field.label}" 0.00 ile 4.00 arasında olmalıdır (örn: 2.40).`;
+        } else if (field.fieldType === "number" && !/^\d+$/.test(value)) {
           return `"${field.label}" yalnızca rakam içermelidir.`;
+        }
       }
     }
     return "";
@@ -179,28 +188,39 @@ function FormPage() {
               </label>
 
               <input
-                type={
-                  field.fieldType === "email" ? "email" :
-                  field.fieldType === "phone" ? "tel" :
-                  field.fieldType === "number" ? "text" :
-                  "text"
-                }
+                type={field.fieldType === "email" ? "email" : field.fieldType === "phone" ? "tel" : "text"}
                 inputMode={
-                  field.fieldType === "phone" || field.fieldType === "number"
-                    ? "numeric"
-                    : undefined
+                  field.key === "gpa" ? "decimal" :
+                  field.fieldType === "phone" || field.fieldType === "number" ? "numeric" :
+                  undefined
                 }
                 value={formData[field.key] || ""}
                 onChange={(e) => {
                   let val = e.target.value;
-                  if (field.fieldType === "phone")
+                  if (field.key === "gpa") {
+                    val = val.replace(",", ".");
+                    val = val.replace(/[^\d.]/g, "");
+                    const dotIdx = val.indexOf(".");
+                    if (dotIdx === -1) {
+                      val = val.slice(0, 1);
+                      if (val && parseInt(val) > 4) val = "4";
+                    } else {
+                      const intPart = val.slice(0, dotIdx).slice(0, 1);
+                      const decPart = val.slice(dotIdx + 1).replace(/\./g, "").slice(0, 2);
+                      const clampedInt = intPart && parseInt(intPart) > 4 ? "4" : intPart;
+                      val = clampedInt + "." + decPart;
+                    }
+                    e.target.value = val;
+                  } else if (field.fieldType === "phone") {
                     val = val.replace(/[^\d\s\-().+]/g, "");
-                  if (field.fieldType === "number")
+                  } else if (field.fieldType === "number") {
                     val = val.replace(/\D/g, "");
+                  }
                   setFormData((prev) => ({ ...prev, [field.key]: val }));
                   if (error) setError("");
                 }}
                 placeholder={
+                  field.key === "gpa" ? "örn: 2.40" :
                   field.fieldType === "email" ? "ornek@mail.com" :
                   field.fieldType === "phone" ? "05xx xxx xx xx" :
                   field.fieldType === "number" ? "Yalnızca rakam" :
