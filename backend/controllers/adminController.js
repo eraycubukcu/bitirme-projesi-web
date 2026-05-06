@@ -1,4 +1,4 @@
-import Admin from "../models/Admin.js";
+﻿import Admin from "../models/Admin.js";
 import jwt from "jsonwebtoken";
 import Student from "../models/Student.js";
 import Teacher from "../models/Teacher.js";
@@ -33,7 +33,7 @@ export const adminLogin = async (req, res) => {
       admin: { id: admin._id, username: admin.username },
     });
   } catch (error) {
-    res.status(500).json({ message: "Server hatası", error: error.message });
+    res.status(500).json({ message: "Server hatası" });
   }
 };
 

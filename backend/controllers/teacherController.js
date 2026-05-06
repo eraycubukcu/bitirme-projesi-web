@@ -1,4 +1,4 @@
-import Teacher from "../models/Teacher.js";
+﻿import Teacher from "../models/Teacher.js";
 import Student from "../models/Student.js";
 import jwt from "jsonwebtoken";
 
@@ -95,7 +95,7 @@ export const teacherLogin = async (req, res) => {
 
     res.json({ message: "Giriş başarılı", token, role: "teacher", teacher });
   } catch (error) {
-    res.status(500).json({ message: "Server hatası", error: error.message });
+    res.status(500).json({ message: "Server hatası" });
   }
 };
 
@@ -240,7 +240,7 @@ export const createTeacher = async (req, res) => {
     const teacher = await Teacher.create({ name, username, password, minQuota, maxQuota });
     res.status(201).json({ message: "Hoca eklendi.", teacher });
   } catch (error) {
-    res.status(500).json({ message: "Server hatası", error: error.message });
+    res.status(500).json({ message: "Server hatası" });
   }
 };
 
@@ -249,7 +249,7 @@ export const getTeachers = async (req, res) => {
     const teachers = await Teacher.find().sort({ createdAt: -1 });
     res.json(teachers);
   } catch (error) {
-    res.status(500).json({ message: "Server hatası", error: error.message });
+    res.status(500).json({ message: "Server hatası" });
   }
 };
 
@@ -268,7 +268,7 @@ export const deleteTeacher = async (req, res) => {
     }
     res.json({ message: "Hoca silindi" });
   } catch (error) {
-    res.status(500).json({ message: "Server hatası", error: error.message });
+    res.status(500).json({ message: "Server hatası" });
   }
 };
 

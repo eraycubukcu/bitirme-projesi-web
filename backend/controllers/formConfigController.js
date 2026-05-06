@@ -1,4 +1,4 @@
-import FormConfig from "../models/FormConfig.js";
+﻿import FormConfig from "../models/FormConfig.js";
 
 // Not ortalaması alanı cascade için zorunlu; her zaman sabit ve required kalmalı
 function enforceGpaField(fields) {
@@ -26,7 +26,7 @@ export const getForm = async (req, res) => {
 
     res.json(form);
   } catch (error) {
-    res.status(500).json({ message: "Server hatası", error: error.message });
+    res.status(500).json({ message: "Server hatası" });
   }
 };
 
