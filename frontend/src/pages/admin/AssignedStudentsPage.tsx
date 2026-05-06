@@ -46,16 +46,16 @@ const AssignedStudentsPage = () => {
   };
 
   const exportTeacherExcel = (teacher: any, group: any[]) => {
-    const columns: any[] = formConfig?.textFields || [];
-    const header = columns.map((col: any) => col.label);
-    const rows = group.map((s) =>
-      columns.map((col: any) => s.formData?.[col.key] ?? ""),
-    );
+    const header = ["Öğrenci No", "Danışman"];
+    const rows = group.map((s) => [
+      s.formData?.ogrenciNo ?? "",
+      teacher.name,
+    ]);
 
     const wsData = [header, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     ws["!cols"] = header.map((_: any, i: number) => ({
-      wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 12),
+      wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 14),
     }));
 
     const wb = XLSX.utils.book_new();

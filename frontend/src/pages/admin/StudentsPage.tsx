@@ -90,22 +90,17 @@ const StudentsPage = () => {
   }, [students, search, filterTeacher, sortKey, sortDir]);
 
   const exportExcel = () => {
-    const header = [
-      ...columns.map((c: any) => c.label),
-      "Tercihler",
-      "Danışman",
-    ];
+    const header = ["Öğrenci No", "Danışman"];
 
     const rows = processed.map((s) => [
-      ...columns.map((c: any) => s.formData?.[c.key] ?? ""),
-      (s.preferences || []).map((p: any, i: number) => `${i + 1}. ${p.name}`).join(" / "),
+      s.formData?.ogrenciNo ?? "",
       s.assignedTeacher?.name ?? "Atanmamış",
     ]);
 
     const wsData = [header, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     ws["!cols"] = header.map((_: any, i: number) => ({
-      wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 10),
+      wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 14),
     }));
 
     const wb = XLSX.utils.book_new();
