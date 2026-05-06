@@ -26,10 +26,10 @@ const AdminLayout = () => {
     <button
       onClick={toggle}
       className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors
-        bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+        bg-gray-900 text-white dark:bg-white dark:text-black"
       title={theme === "dark" ? "Aydınlık tema" : "Karanlık tema"}
     >
-      {theme === "dark" ? "☀" : "☾"}
+      ☾
     </button>
   );
 
@@ -37,7 +37,7 @@ const AdminLayout = () => {
     <div className="flex flex-col h-full p-5">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-lg font-semibold dark:text-gray-100">Admin Panel</h1>
+          <h1 className="text-lg font-semibold dark:text-white">Admin Panel</h1>
           <p className="text-xs text-gray-400">Danışman Sistemi</p>
         </div>
         <ThemeBtn />
@@ -50,8 +50,8 @@ const AdminLayout = () => {
             onClick={() => setOpen(false)}
             className={`block px-3 py-2 rounded-lg text-sm transition
             ${location.pathname === item.path
-              ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
-              : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+              ? "bg-gray-900 text-white dark:bg-white dark:text-black"
+              : "text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-900"
             }`}
           >
             {item.name}
@@ -60,7 +60,7 @@ const AdminLayout = () => {
       </nav>
       <button
         onClick={handleLogout}
-        className="text-sm text-red-500 hover:text-red-700 transition text-left pt-4 border-t dark:border-gray-700"
+        className="text-sm text-red-500 hover:text-red-700 transition text-left pt-4 border-t dark:border-zinc-800"
       >
         Çıkış Yap
       </button>
@@ -68,22 +68,22 @@ const AdminLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
 
       {/* ── Mobil üst bar ────────────────────────────────────────── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white dark:bg-gray-900 border-b dark:border-gray-700
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white dark:bg-zinc-950 border-b dark:border-zinc-800
         flex items-center px-4 z-40">
         <button
           onClick={() => setOpen(true)}
           className="w-9 h-9 flex flex-col items-center justify-center gap-1.5
-          rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-900 transition"
           aria-label="Menü"
         >
-          <span className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 rounded" />
-          <span className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 rounded" />
-          <span className="w-5 h-0.5 bg-gray-700 dark:bg-gray-300 rounded" />
+          <span className="w-5 h-0.5 bg-gray-700 dark:bg-white rounded" />
+          <span className="w-5 h-0.5 bg-gray-700 dark:bg-white rounded" />
+          <span className="w-5 h-0.5 bg-gray-700 dark:bg-white rounded" />
         </button>
-        <span className="ml-3 font-semibold text-gray-900 dark:text-gray-100">Admin Panel</span>
+        <span className="ml-3 font-semibold text-gray-900 dark:text-white">Admin Panel</span>
         <div className="ml-auto">
           <ThemeBtn />
         </div>
@@ -99,7 +99,7 @@ const AdminLayout = () => {
 
       {/* ── Sidebar ──────────────────────────────────────────────── */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-64 bg-white dark:bg-gray-900 border-r dark:border-gray-700 z-50
+        className={`fixed top-0 left-0 h-screen w-64 bg-white dark:bg-zinc-950 border-r dark:border-zinc-800 z-50
           transition-transform duration-200
           ${open ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0`}

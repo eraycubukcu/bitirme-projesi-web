@@ -73,13 +73,13 @@ const Dashboard = () => {
       {/* ── Başlık ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-sm text-gray-400 mt-0.5">Danışman Atama Sistemi</p>
         </div>
         <button
           onClick={fetchData}
-          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 border dark:border-gray-700 rounded-lg
-          px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition"
+          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 border dark:border-zinc-800 rounded-lg
+          px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-700 dark:hover:text-white transition"
         >
           <span className="text-base leading-none">↻</span> Yenile
         </button>
@@ -90,7 +90,7 @@ const Dashboard = () => {
         className={`flex items-center justify-between px-4 py-3 rounded-xl border mb-6 ${
           formStatus?.isOpen
             ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-            : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+            : "bg-gray-50 dark:bg-zinc-900 border-gray-200 dark:border-zinc-800"
         }`}
       >
         <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ const Dashboard = () => {
             }`}
           />
           <div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Başvuru Formu</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-white">Başvuru Formu</span>
             <span
               className={`ml-2 text-sm font-semibold ${
                 formStatus?.isOpen ? "text-green-600" : "text-gray-500 dark:text-gray-400"
@@ -117,8 +117,8 @@ const Dashboard = () => {
         </div>
         <Link
           to="/admin/form"
-          className="text-xs text-gray-500 dark:text-gray-400 border dark:border-gray-600 rounded px-2 py-1
-          hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 transition"
+          className="text-xs text-gray-500 dark:text-gray-400 border dark:border-zinc-700 rounded px-2 py-1
+          hover:bg-white dark:hover:bg-zinc-900 hover:text-gray-700 dark:hover:text-white transition"
         >
           Ayarla
         </Link>
@@ -132,24 +132,24 @@ const Dashboard = () => {
           { label: "Bekleyen",       value: unassignedCount, color: unassignedCount > 0 ? "text-red-500" : "" },
           { label: "Danışman",       value: teacherCount,    color: "" },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl p-4">
+          <div key={label} className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-xl p-4">
             <p className="text-xs text-gray-400 mb-1">{label}</p>
-            <p className={`text-3xl font-bold ${color || "text-gray-900 dark:text-gray-100"}`}>{value}</p>
+            <p className={`text-3xl font-bold ${color || "text-gray-900 dark:text-white"}`}>{value}</p>
           </div>
         ))}
       </div>
 
       {/* ── Atama ilerleme çubuğu ──────────────────────────────────── */}
       {studentCount > 0 && (
-        <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl p-5 mb-5">
+        <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-xl p-5 mb-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Atama Durumu</span>
-            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <span className="text-sm font-medium text-gray-700 dark:text-white">Atama Durumu</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-white">
               {assignedCount} / {studentCount}
               <span className="text-xs font-normal text-gray-400 ml-1">(%{assignedPct})</span>
             </span>
           </div>
-          <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+          <div className="w-full bg-gray-100 dark:bg-zinc-800 rounded-full h-2">
             <div
               className={`h-2 rounded-full transition-all duration-500 ${
                 assignedPct === 100 ? "bg-green-500" : "bg-blue-500"
@@ -166,16 +166,16 @@ const Dashboard = () => {
 
       {/* ── Hoca onay durumu ───────────────────────────────────────── */}
       {teachers && teachers.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl p-5">
+        <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Danışman Onay Durumu</h2>
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-white">Danışman Onay Durumu</h2>
               <p className="text-xs text-gray-400 mt-0.5">
                 {finalizedCount} / {teacherCount} tamamladı
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-28 bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+              <div className="w-28 bg-gray-100 dark:bg-zinc-800 rounded-full h-1.5">
                 <div
                   className={`h-1.5 rounded-full transition-all duration-500 ${
                     allFinalized ? "bg-green-500" : "bg-blue-500"
@@ -199,20 +199,20 @@ const Dashboard = () => {
                 className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm ${
                   t.hasFinalized
                     ? "bg-green-50 dark:bg-green-900/20"
-                    : "bg-gray-50 dark:bg-gray-800"
+                    : "bg-gray-50 dark:bg-zinc-900"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <span
                     className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                      t.hasFinalized ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
+                      t.hasFinalized ? "bg-green-500" : "bg-gray-300 dark:bg-zinc-600"
                     }`}
                   />
                   <span
                     className={
                       t.hasFinalized
-                        ? "text-gray-700 dark:text-gray-200 font-medium"
-                        : "text-gray-400 dark:text-gray-500"
+                        ? "text-gray-700 dark:text-white font-medium"
+                        : "text-gray-400 dark:text-zinc-500"
                     }
                   >
                     {t.name}
@@ -220,9 +220,9 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4">
                   <div className="hidden sm:flex items-center gap-1.5">
-                    <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1">
+                    <div className="w-16 bg-gray-200 dark:bg-zinc-800 rounded-full h-1">
                       <div
-                        className="bg-gray-400 dark:bg-gray-500 h-1 rounded-full"
+                        className="bg-gray-400 dark:bg-zinc-500 h-1 rounded-full"
                         style={{
                           width: `${t.maxQuota > 0 ? Math.min((t.currentCount / t.maxQuota) * 100, 100) : 0}%`,
                         }}
@@ -248,7 +248,7 @@ const Dashboard = () => {
           </div>
 
           {/* ── Cascade bölümü ──────────────────────────────────────── */}
-          <div className="pt-3 border-t dark:border-gray-700 space-y-3">
+          <div className="pt-3 border-t dark:border-zinc-800 space-y-3">
             {formStatus?.cascadeDate && (
               <div className="flex items-center justify-between text-xs">
                 <span className="text-gray-500 dark:text-gray-400">
@@ -303,7 +303,7 @@ const Dashboard = () => {
 
             {!cascadeResult && showCascadeConfirm ? (
               <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg space-y-2">
-                <p className="text-xs text-gray-600 dark:text-gray-300">
+                <p className="text-xs text-gray-600 dark:text-zinc-300">
                   Onaylanmayan öğrenciler 2. tercihlerinden itibaren atanacak.
                   Bu işlem geri alınamaz.
                 </p>
@@ -318,8 +318,8 @@ const Dashboard = () => {
                   </button>
                   <button
                     onClick={() => setShowCascadeConfirm(false)}
-                    className="text-xs px-3 py-1.5 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300
-                    hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    className="text-xs px-3 py-1.5 border dark:border-zinc-700 rounded-lg text-gray-600 dark:text-zinc-300
+                    hover:bg-gray-50 dark:hover:bg-zinc-900 transition"
                   >
                     İptal
                   </button>

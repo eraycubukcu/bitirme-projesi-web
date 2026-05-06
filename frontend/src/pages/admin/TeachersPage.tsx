@@ -100,14 +100,14 @@ const TeachersPage = () => {
   if (fetchError && teachers.length === 0)
     return <div className="p-6 text-red-500">{fetchError}</div>;
 
-  const inputCls = "peer w-full border dark:border-gray-600 rounded-lg px-3 pt-5 pb-2 text-sm " +
-    "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 " +
-    "focus:outline-none focus:border-gray-900 dark:focus:border-gray-100 focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-100";
+  const inputCls = "peer w-full border dark:border-zinc-700 rounded-lg px-3 pt-5 pb-2 text-sm " +
+    "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white " +
+    "focus:outline-none focus:border-gray-900 dark:focus:border-white focus:ring-1 focus:ring-gray-900 dark:focus:ring-white";
 
-  const labelCls = "absolute left-3 top-2 text-gray-400 dark:text-gray-500 text-xs bg-white dark:bg-gray-800 px-1 " +
+  const labelCls = "absolute left-3 top-2 text-gray-400 dark:text-gray-500 text-xs bg-white dark:bg-zinc-900 px-1 " +
     "pointer-events-none transition-all " +
     "peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm " +
-    "peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-900 dark:peer-focus:text-gray-100 " +
+    "peer-focus:-top-2 peer-focus:text-xs peer-focus:text-gray-900 dark:peer-focus:text-white " +
     "peer-not-placeholder-shown:-top-2 peer-not-placeholder-shown:text-xs";
 
   return (
@@ -116,13 +116,13 @@ const TeachersPage = () => {
       {/* ── Başlık ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Danışmanlar</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Danışmanlar</h1>
           <p className="text-sm text-gray-400 mt-0.5">{teachers.length} danışman</p>
         </div>
         <button
           onClick={openAddModal}
-          className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm rounded-lg
-          hover:bg-black dark:hover:bg-gray-100 transition"
+          className="px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-black text-sm rounded-lg
+          hover:bg-black dark:hover:bg-zinc-100 transition"
         >
           + Danışman Ekle
         </button>
@@ -137,22 +137,22 @@ const TeachersPage = () => {
       {/* ── Liste ──────────────────────────────────────────────── */}
       <div className="space-y-3">
         {teachers.length === 0 && (
-          <div className="text-center py-16 text-sm text-gray-300 dark:text-gray-600 border dark:border-gray-700 border-dashed rounded-xl">
+          <div className="text-center py-16 text-sm text-gray-300 dark:text-zinc-700 border dark:border-zinc-800 border-dashed rounded-xl">
             Henüz danışman eklenmedi.
           </div>
         )}
 
         {teachers.map((t) => (
-          <div key={t._id} className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl p-4">
+          <div key={t._id} className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-xl p-4">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{t.name}</p>
+                  <p className="font-medium text-gray-900 dark:text-white">{t.name}</p>
                   <span
                     className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       t.hasFinalized
                         ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
+                        : "bg-gray-100 dark:bg-zinc-900 text-gray-500 dark:text-gray-400"
                     }`}
                   >
                     {t.hasFinalized ? "Onayladı" : "Bekliyor"}
@@ -163,12 +163,12 @@ const TeachersPage = () => {
                 <div className="flex items-center gap-3">
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     {t.currentCount} / {t.maxQuota} öğrenci
-                    <span className="text-gray-300 dark:text-gray-600 mx-1">·</span>
+                    <span className="text-gray-300 dark:text-zinc-700 mx-1">·</span>
                     Min: {t.minQuota}
                   </p>
-                  <div className="w-20 bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+                  <div className="w-20 bg-gray-100 dark:bg-zinc-800 rounded-full h-1.5">
                     <div
-                      className="bg-gray-400 dark:bg-gray-500 h-1.5 rounded-full transition-all"
+                      className="bg-gray-400 dark:bg-zinc-500 h-1.5 rounded-full transition-all"
                       style={{
                         width: `${t.maxQuota > 0 ? Math.min((t.currentCount / t.maxQuota) * 100, 100) : 0}%`,
                       }}
@@ -194,7 +194,7 @@ const TeachersPage = () => {
             </div>
 
             {confirmDeleteId === t._id && (
-              <div className="mt-3 pt-3 border-t dark:border-gray-700 flex items-center justify-between">
+              <div className="mt-3 pt-3 border-t dark:border-zinc-800 flex items-center justify-between">
                 <p className="text-xs text-gray-500 dark:text-gray-400">Bu danışman silinecek. Emin misin?</p>
                 <div className="flex gap-2">
                   <button
@@ -206,8 +206,8 @@ const TeachersPage = () => {
                   </button>
                   <button
                     onClick={() => setConfirmDeleteId(null)}
-                    className="text-xs px-3 py-1.5 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300
-                    hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    className="text-xs px-3 py-1.5 border dark:border-zinc-700 rounded-lg text-gray-600 dark:text-zinc-300
+                    hover:bg-gray-50 dark:hover:bg-zinc-900 transition"
                   >
                     İptal
                   </button>
@@ -221,11 +221,11 @@ const TeachersPage = () => {
       {/* ── Modal ──────────────────────────────────────────────── */}
       {showModal && (
         <div
-          className="fixed inset-0 bg-black/30 dark:bg-black/60 flex items-end sm:items-center justify-center z-50"
+          className="fixed inset-0 bg-black/30 dark:bg-black/70 flex items-end sm:items-center justify-center z-50"
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
-          <div className="bg-white dark:bg-gray-900 p-5 sm:p-6 rounded-t-2xl sm:rounded-xl shadow-lg border dark:border-gray-700 w-full sm:w-80 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="font-semibold text-gray-800 dark:text-gray-100">
+          <div className="bg-white dark:bg-zinc-950 p-5 sm:p-6 rounded-t-2xl sm:rounded-xl shadow-lg border dark:border-zinc-800 w-full sm:w-80 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="font-semibold text-gray-800 dark:text-white">
               {editTeacher ? "Danışman Güncelle" : "Danışman Ekle"}
             </h2>
 
@@ -285,15 +285,15 @@ const TeachersPage = () => {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-2.5 rounded-xl text-sm
-              hover:bg-black dark:hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gray-900 dark:bg-white text-white dark:text-black py-2.5 rounded-xl text-sm
+              hover:bg-black dark:hover:bg-zinc-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Kaydediliyor..." : editTeacher ? "Güncelle" : "Ekle"}
             </button>
 
             <button
               onClick={() => setShowModal(false)}
-              className="w-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl py-2 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+              className="w-full text-sm bg-gray-100 dark:bg-zinc-900 text-gray-700 dark:text-white rounded-xl py-2 hover:bg-gray-200 dark:hover:bg-zinc-800 transition"
             >
               İptal
             </button>

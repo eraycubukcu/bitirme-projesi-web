@@ -50,6 +50,11 @@ export const submitForm = async (req, res) => {
           if (!/^\d+$/.test(digits) || digits.length < 7) {
             return res.status(400).json({ message: `"${field.label}" geçerli bir telefon numarası olmalıdır.` });
           }
+        } else if (field.key === "gpa") {
+          const num = parseFloat(value);
+          if (isNaN(num) || num < 0 || num > 4 || !/^\d+(\.\d{1,2})?$/.test(value)) {
+            return res.status(400).json({ message: `"${field.label}" 0.00 ile 4.00 arasında, en fazla 2 ondalık basamaklı olmalıdır (örn: 2.40).` });
+          }
         } else if (field.fieldType === "number") {
           if (!/^\d+$/.test(value)) {
             return res.status(400).json({ message: `"${field.label}" yalnızca rakam içermelidir.` });

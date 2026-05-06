@@ -76,7 +76,7 @@ const AssignedStudentsPage = () => {
 
   return (
     <div className="p-4 sm:p-6 w-full">
-      <h1 className="text-xl font-semibold mb-1 text-gray-900 dark:text-gray-100">Atama Sonuçları</h1>
+      <h1 className="text-xl font-semibold mb-1 text-gray-900 dark:text-white">Atama Sonuçları</h1>
       <p className="text-sm text-gray-400 mb-4">
         Atanan: {assigned.length} · Atanmayan: {unassigned.length} · Toplam: {students.length}
       </p>
@@ -99,25 +99,25 @@ const AssignedStudentsPage = () => {
           <div key={teacher._id} className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
-                <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{teacher.name}</h2>
+                <h2 className="text-base font-semibold text-gray-900 dark:text-white">{teacher.name}</h2>
                 <span className="text-xs text-gray-400">
                   {group.length} / {teacher.maxQuota} öğrenci
                 </span>
               </div>
               <button
                 onClick={() => exportTeacherExcel(teacher, group)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-300 dark:border-gray-600
-                rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-300 dark:border-zinc-700
+                rounded-lg text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-900 transition"
               >
                 ↓ Excel İndir
               </button>
             </div>
 
-            <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg overflow-x-auto">
+            <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-lg overflow-x-auto">
               <div className="min-w-max">
                 {columns.length > 0 && (
                   <div
-                    className="grid bg-gray-100 dark:bg-gray-800 text-xs font-medium p-3 text-gray-600 dark:text-gray-300"
+                    className="grid bg-gray-100 dark:bg-zinc-900 text-xs font-medium p-3 text-gray-600 dark:text-zinc-300"
                     style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr))` }}
                   >
                     {columns.map((col: any) => (
@@ -128,7 +128,7 @@ const AssignedStudentsPage = () => {
                 {group.map((s) => (
                   <div
                     key={s._id}
-                    className="grid items-center p-3 border-t dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200"
+                    className="grid items-center p-3 border-t dark:border-zinc-800 text-sm text-gray-700 dark:text-white"
                     style={{
                       gridTemplateColumns: columns.length > 0
                         ? `repeat(${columns.length}, minmax(120px, 1fr))`
@@ -160,11 +160,11 @@ const AssignedStudentsPage = () => {
             <span className="text-xs text-red-400">{unassigned.length} öğrenci</span>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 border border-red-100 dark:border-red-900/50 rounded-lg overflow-x-auto">
+          <div className="bg-white dark:bg-zinc-950 border border-red-100 dark:border-red-900/50 rounded-lg overflow-x-auto">
             <div className="min-w-max">
               {columns.length > 0 && (
                 <div
-                  className="grid bg-red-50 dark:bg-red-900/20 text-xs font-medium p-3 text-gray-600 dark:text-gray-300"
+                  className="grid bg-red-50 dark:bg-red-900/20 text-xs font-medium p-3 text-gray-600 dark:text-zinc-300"
                   style={{
                     gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr)) 180px 160px`,
                   }}
@@ -179,7 +179,7 @@ const AssignedStudentsPage = () => {
               {unassigned.map((s) => (
                 <div
                   key={s._id}
-                  className="grid items-center p-3 border-t dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200"
+                  className="grid items-center p-3 border-t dark:border-zinc-800 text-sm text-gray-700 dark:text-white"
                   style={{
                     gridTemplateColumns: columns.length > 0
                       ? `repeat(${columns.length}, minmax(120px, 1fr)) 180px 160px`
@@ -198,9 +198,9 @@ const AssignedStudentsPage = () => {
                     <select
                       value={selectedTeacher[s._id] || ""}
                       onChange={(e) => setSelectedTeacher((prev) => ({ ...prev, [s._id]: e.target.value }))}
-                      className="border dark:border-gray-600 rounded px-2 py-1.5 text-xs
-                      bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200
-                      focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-100"
+                      className="border dark:border-zinc-700 rounded px-2 py-1.5 text-xs
+                      bg-white dark:bg-zinc-900 text-gray-700 dark:text-white
+                      focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white"
                     >
                       <option value="">Hoca seç...</option>
                       {teachers
@@ -214,8 +214,8 @@ const AssignedStudentsPage = () => {
                     <button
                       onClick={() => handleAssign(s._id)}
                       disabled={!selectedTeacher[s._id] || assigning === s._id}
-                      className="text-xs px-2 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded
-                      disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black dark:hover:bg-gray-100 transition"
+                      className="text-xs px-2 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded
+                      disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black dark:hover:bg-zinc-100 transition"
                     >
                       {assigning === s._id ? "Atanıyor..." : "Ata"}
                     </button>

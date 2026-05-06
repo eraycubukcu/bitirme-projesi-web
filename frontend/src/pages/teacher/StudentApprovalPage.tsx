@@ -87,18 +87,18 @@ const StudentApprovalPage = () => {
 
   return (
     <div className="p-6 w-full">
-      <h1 className="text-xl font-semibold mb-1 text-gray-900 dark:text-gray-100">Öğrenci Onay Listesi</h1>
+      <h1 className="text-xl font-semibold mb-1 text-gray-900 dark:text-white">Öğrenci Onay Listesi</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{teacher.name}</p>
 
       {/* Onay ilerleme çubuğu */}
-      <div className="mb-5 p-3 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-xl flex items-center gap-3 text-sm">
-        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+      <div className="mb-5 p-3 bg-gray-50 dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl flex items-center gap-3 text-sm">
+        <div className="flex-1 bg-gray-200 dark:bg-zinc-800 rounded-full h-2">
           <div
-            className="bg-gray-700 dark:bg-gray-300 h-2 rounded-full transition-all"
+            className="bg-gray-700 dark:bg-white h-2 rounded-full transition-all"
             style={{ width: `${totalTeachers > 0 ? (finalizedCount / totalTeachers) * 100 : 0}%` }}
           />
         </div>
-        <span className="text-gray-600 dark:text-gray-300 whitespace-nowrap">
+        <span className="text-gray-600 dark:text-zinc-300 whitespace-nowrap">
           {finalizedCount}/{totalTeachers} hoca onayladı
         </span>
       </div>
@@ -156,9 +156,9 @@ const StudentApprovalPage = () => {
           { label: "Kalan Limit",  value: selectionLimit - selectedIds.size, red: selectionLimit - selectedIds.size === 0 },
           { label: "Maks",         value: teacher.maxQuota },
         ].map(({ label, value, highlight, red }) => (
-          <div key={label} className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm">
+          <div key={label} className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-lg px-4 py-2.5 text-sm">
             <span className="text-gray-400">{label}: </span>
-            <span className={`font-semibold ${highlight ? "text-blue-600" : red ? "text-red-500" : "text-gray-900 dark:text-gray-100"}`}>
+            <span className={`font-semibold ${highlight ? "text-blue-600" : red ? "text-red-500" : "text-gray-900 dark:text-white"}`}>
               {value}
             </span>
           </div>
@@ -172,7 +172,7 @@ const StudentApprovalPage = () => {
       )}
 
       {allStudents.length === 0 && (
-        <div className="text-gray-400 text-sm py-10 text-center bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg">
+        <div className="text-gray-400 text-sm py-10 text-center bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-lg">
           1. tercih listenizdeki öğrenci yok.
         </div>
       )}
@@ -180,10 +180,10 @@ const StudentApprovalPage = () => {
       {/* Öğrenci tablosu */}
       {allStudents.length > 0 && (
         <>
-          <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg overflow-x-auto mb-4">
+          <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-lg overflow-x-auto mb-4">
            <div className="min-w-max">
             <div
-              className="grid bg-gray-100 dark:bg-gray-800 text-xs font-semibold p-3 text-gray-500 dark:text-gray-400"
+              className="grid bg-gray-100 dark:bg-zinc-900 text-xs font-semibold p-3 text-gray-500 dark:text-gray-400"
               style={{ gridTemplateColumns: `40px repeat(${columns.length + 1}, minmax(140px,1fr))` }}
             >
               <div />
@@ -199,12 +199,12 @@ const StudentApprovalPage = () => {
                 <div
                   key={s._id}
                   onClick={() => { if (!isDisabled) toggleSelect(s._id); }}
-                  className={`grid items-center p-3 border-t dark:border-gray-700 text-sm cursor-pointer transition-colors
+                  className={`grid items-center p-3 border-t dark:border-zinc-800 text-sm cursor-pointer transition-colors
                     ${isSelected
                       ? "bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-blue-400"
                       : isDisabled
                       ? "opacity-40 cursor-not-allowed"
-                      : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                      : "hover:bg-gray-50 dark:hover:bg-zinc-900"
                     }`}
                   style={{ gridTemplateColumns: `40px repeat(${columns.length + 1}, minmax(140px,1fr))` }}
                 >
@@ -217,7 +217,7 @@ const StudentApprovalPage = () => {
                     className="cursor-pointer w-4 h-4"
                   />
                   {columns.map((col: any) => (
-                    <div key={col.key} className="text-gray-700 dark:text-gray-200">
+                    <div key={col.key} className="text-gray-700 dark:text-white">
                       {s.formData?.[col.key] || "-"}
                     </div>
                   ))}
@@ -235,7 +235,7 @@ const StudentApprovalPage = () => {
           {/* Onay / güncelleme bölümü */}
           {showConfirm ? (
             <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl space-y-3">
-              <p className="text-sm text-gray-700 dark:text-gray-200">
+              <p className="text-sm text-gray-700 dark:text-white">
                 <span className="font-semibold">{selectedIds.size} öğrenci</span> onaylanacak.
                 {allStudents.length - selectedIds.size > 0 && (
                   <> <span className="font-semibold">{allStudents.length - selectedIds.size} öğrenci</span> onaylanmayacak — atama bekleyecek.</>
@@ -248,15 +248,15 @@ const StudentApprovalPage = () => {
                 <button
                   onClick={handleFinalize}
                   disabled={loading}
-                  className="px-5 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-sm font-medium
-                  hover:bg-black dark:hover:bg-gray-100 transition disabled:opacity-50"
+                  className="px-5 py-2 bg-gray-900 dark:bg-white text-white dark:text-black rounded-lg text-sm font-medium
+                  hover:bg-black dark:hover:bg-zinc-100 transition disabled:opacity-50"
                 >
                   {loading ? "İşleniyor..." : "Evet, Onayla"}
                 </button>
                 <button
                   onClick={() => setShowConfirm(false)}
-                  className="px-5 py-2 border dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-300
-                  hover:bg-white dark:hover:bg-gray-800 transition"
+                  className="px-5 py-2 border dark:border-zinc-700 rounded-lg text-sm text-gray-600 dark:text-zinc-300
+                  hover:bg-white dark:hover:bg-zinc-900 transition"
                 >
                   İptal
                 </button>
@@ -267,8 +267,8 @@ const StudentApprovalPage = () => {
               <button
                 onClick={() => setShowConfirm(true)}
                 disabled={loading}
-                className="px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-medium
-                hover:bg-black dark:hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded-xl text-sm font-medium
+                hover:bg-black dark:hover:bg-zinc-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {teacher.hasFinalized ? "Seçimleri Güncelle" : "Onayla ve Tamamla"}
               </button>

@@ -3,23 +3,67 @@ import Student from "../models/Student.js";
 import jwt from "jsonwebtoken";
 
 // ─── Cascade algoritması ──────────────────────────────────────────────────────
-// Tüm hocalar onayladıktan sonra atanmamış öğrencileri sıradaki uygun
-// tercihlerine atar. preferences[0] hocanın zaten onaylamadığı bilinir,
-// bu yüzden i=1'den başlanır.
+// Atanmamış öğrencileri sıradaki tercihlerine atar. Aynı hocayı isteyen
+// birden fazla öğrenci varsa ve kontenjan yetmiyorsa not ortalaması (gpa)
+// yüksek olan öğrenci öncelikli atanır.
+// Her turda tüm öğrenciler eş zamanlı yarışır; tur sonunda atanmayanlar
+// bir sonraki tercihlerine geçer.
 async function runCascade() {
-  const unassigned = await Student.find({ status: "unassigned" });
+  let madeAssignment = true;
 
-  for (const student of unassigned) {
-    for (let i = 1; i < student.preferences.length; i++) {
-      const nextTeacher = await Teacher.findById(student.preferences[i]);
-      if (nextTeacher && nextTeacher.currentCount < nextTeacher.maxQuota) {
-        student.assignedTeacher = nextTeacher._id;
+  while (madeAssignment) {
+    madeAssignment = false;
+
+    const unassigned = await Student.find({ status: "unassigned" });
+    if (unassigned.length === 0) break;
+
+    // Güncel hoca verilerini çek
+    const allTeachers = await Teacher.find();
+    const teacherMap = new Map(allTeachers.map((t) => [t._id.toString(), t]));
+
+    // Her öğrenci için ilk uygun tercihini bul ve o hocaya aday olarak ekle
+    // teacherCandidates: teacherId -> [student, ...]
+    const teacherCandidates = new Map();
+
+    for (const student of unassigned) {
+      for (let i = 1; i < student.preferences.length; i++) {
+        const teacherId = student.preferences[i].toString();
+        const teacher = teacherMap.get(teacherId);
+        if (teacher && teacher.currentCount < teacher.maxQuota) {
+          if (!teacherCandidates.has(teacherId)) {
+            teacherCandidates.set(teacherId, []);
+          }
+          teacherCandidates.get(teacherId).push(student);
+          break; // Bu öğrenci için sadece bir sonraki uygun tercih
+        }
+      }
+    }
+
+    // Her hoca için adayları not ortalamasına göre sırala, kontenjan kadar ata
+    for (const [teacherId, candidates] of teacherCandidates) {
+      const teacher = teacherMap.get(teacherId);
+      if (!teacher) continue;
+
+      const availableSlots = teacher.maxQuota - teacher.currentCount;
+      if (availableSlots <= 0) continue;
+
+      // Not ortalaması yüksek olan önce gelsin (büyükten küçüğe)
+      candidates.sort((a, b) => {
+        const gpaA = parseFloat(a.formData?.gpa) || 0;
+        const gpaB = parseFloat(b.formData?.gpa) || 0;
+        return gpaB - gpaA;
+      });
+
+      const toAssign = candidates.slice(0, availableSlots);
+
+      for (const student of toAssign) {
+        student.assignedTeacher = teacher._id;
         student.status = "assigned";
         await student.save();
-        await Teacher.findByIdAndUpdate(nextTeacher._id, {
+        await Teacher.findByIdAndUpdate(teacher._id, {
           $inc: { currentCount: 1 },
         });
-        break;
+        madeAssignment = true;
       }
     }
   }
