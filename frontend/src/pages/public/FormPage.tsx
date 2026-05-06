@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 import type { Field, FormConfig } from "../../types";
+import { useTheme } from "../../ThemeContext";
 
 function FormPage() {
   const [form, setForm] = useState<FormConfig | null>(null);
@@ -9,6 +10,7 @@ function FormPage() {
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { theme, toggle } = useTheme();
 
   useEffect(() => { document.title = "Bitirme Projesi Danışman Seçimi"; }, []);
 
@@ -26,9 +28,21 @@ function FormPage() {
     fetchData();
   }, []);
 
+  const ThemeBtn = () => (
+    <button
+      onClick={toggle}
+      className="fixed top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors
+        bg-gray-900 text-white dark:bg-white dark:text-gray-900 z-50"
+      title={theme === "dark" ? "Aydınlık tema" : "Karanlık tema"}
+    >
+      {theme === "dark" ? "☀" : "☾"}
+    </button>
+  );
+
   if (!form) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <ThemeBtn />
         {error ? (
           <p className="text-red-500 text-sm">{error}</p>
         ) : (
@@ -42,7 +56,6 @@ function FormPage() {
   const start = form.startDate ? new Date(form.startDate) : null;
   const end = form.endDate ? new Date(form.endDate) : null;
 
-  // Tarih girilmemişse form kapalı (backend ile aynı kural)
   const isFormOpen =
     !!(start || end) &&
     (!start || now >= start) &&
@@ -116,9 +129,10 @@ function FormPage() {
   // ✅ SUBMITTED
   if (submitted)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="bg-white w-full max-w-lg rounded-2xl shadow-lg p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
+        <ThemeBtn />
+        <div className="bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-lg border dark:border-gray-700 p-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Form Gönderildi!
           </h2>
           <p className="text-sm text-gray-400">
@@ -128,19 +142,20 @@ function FormPage() {
       </div>
     );
 
-  // 🔥 FORM KAPALI (EN SONDA)
+  // 🔥 FORM KAPALI
   if (!isFormOpen)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
-        <div className="bg-white border shadow-xl rounded-2xl p-8 text-center max-w-md w-full">
-          <h2 className="text-xl font-semibold text-gray-800 mb-3">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 px-4">
+        <ThemeBtn />
+        <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 shadow-xl rounded-2xl p-8 text-center max-w-md w-full">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3">
             Form Kapalı
           </h2>
 
           {start && now < start && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Açılış:{" "}
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-gray-700 dark:text-gray-200">
                 {start.toLocaleString("tr-TR")}
               </span>
             </p>
@@ -157,11 +172,12 @@ function FormPage() {
 
   // ✅ NORMAL FORM
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
-      <div className="w-full max-w-md bg-white rounded-xl border shadow-sm p-5 sm:p-8">
-        
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 py-10">
+      <ThemeBtn />
+      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl border dark:border-gray-700 shadow-sm p-5 sm:p-8">
+
         <div className="mb-8">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             Danışman Seçimi
           </h1>
 
@@ -171,7 +187,6 @@ function FormPage() {
             </p>
           )}
 
-          {/* 🔥 SON TARİH HER ZAMAN GÖZÜKSÜN */}
           {end && (
             <p className="text-sm text-red-500 mt-2 font-medium">
               Son Tarih: {end.toLocaleString("tr-TR")}
@@ -182,7 +197,7 @@ function FormPage() {
         <div className="space-y-5 mb-8">
           {form.textFields.map((field: Field) => (
             <div key={field.key}>
-              <label className="text-sm text-gray-500">
+              <label className="text-sm text-gray-500 dark:text-gray-400">
                 {field.label}
                 {field.required && <span className="text-red-400 ml-0.5">*</span>}
               </label>
@@ -226,14 +241,16 @@ function FormPage() {
                   field.fieldType === "number" ? "Yalnızca rakam" :
                   ""
                 }
-                className="w-full mt-1 border-b py-2 text-sm focus:outline-none focus:border-gray-900"
+                className="w-full mt-1 border-b dark:border-gray-600 py-2 text-sm bg-transparent
+                text-gray-900 dark:text-gray-100 placeholder:text-gray-300 dark:placeholder:text-gray-600
+                focus:outline-none focus:border-gray-900 dark:focus:border-gray-100"
               />
             </div>
           ))}
         </div>
 
         <div className="mb-8">
-          <h2 className="text-sm font-medium text-gray-700 mb-3">
+          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Tercih Sıralaması
           </h2>
 
@@ -241,25 +258,27 @@ function FormPage() {
             {teachers.map((teacher, index) => (
               <div
                 key={teacher._id}
-                className="flex justify-between border p-2 rounded-md"
+                className="flex justify-between border dark:border-gray-700 p-2 rounded-md"
               >
                 <div className="flex gap-3">
                   <span className="text-gray-400">{index + 1}</span>
-                  <span>{teacher.name}</span>
+                  <span className="text-gray-800 dark:text-gray-200">{teacher.name}</span>
                 </div>
 
                 <div className="flex gap-1">
                   <button
                     onClick={() => moveUp(index)}
                     disabled={index === 0}
-                    className="w-9 h-9 flex items-center justify-center border rounded-lg text-gray-500
-                    hover:bg-gray-100 disabled:opacity-25 disabled:cursor-not-allowed transition active:scale-95"
+                    className="w-9 h-9 flex items-center justify-center border dark:border-gray-600 rounded-lg
+                    text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800
+                    disabled:opacity-25 disabled:cursor-not-allowed transition active:scale-95"
                   >↑</button>
                   <button
                     onClick={() => moveDown(index)}
                     disabled={index === teachers.length - 1}
-                    className="w-9 h-9 flex items-center justify-center border rounded-lg text-gray-500
-                    hover:bg-gray-100 disabled:opacity-25 disabled:cursor-not-allowed transition active:scale-95"
+                    className="w-9 h-9 flex items-center justify-center border dark:border-gray-600 rounded-lg
+                    text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800
+                    disabled:opacity-25 disabled:cursor-not-allowed transition active:scale-95"
                   >↓</button>
                 </div>
               </div>
@@ -274,7 +293,8 @@ function FormPage() {
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full py-3 text-white bg-gray-900 rounded-lg"
+          className="w-full py-3 text-white bg-gray-900 dark:bg-white dark:text-gray-900
+          hover:bg-black dark:hover:bg-gray-100 rounded-lg transition disabled:opacity-50"
         >
           {isSubmitting ? "Gönderiliyor..." : "Gönder"}
         </button>

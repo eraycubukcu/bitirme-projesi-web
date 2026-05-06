@@ -28,7 +28,6 @@ const StudentApprovalPage = () => {
       const d: PageData = myRes.data;
       setData(d);
       setFormConfig(formRes.data);
-      // Onaylanmış öğrencileri pre-select et
       if (d.teacher.hasFinalized) {
         setSelectedIds(new Set((d.approvedStudents || []).map((s: any) => s._id)));
       }
@@ -37,6 +36,7 @@ const StudentApprovalPage = () => {
     }
   };
 
+  useEffect(() => { document.title = "Öğrenci Onay Listesi"; }, []);
   useEffect(() => { fetchData(); }, []);
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
@@ -45,13 +45,11 @@ const StudentApprovalPage = () => {
   const { teacher, finalizedCount, totalTeachers } = data;
   const columns: any[] = formConfig.textFields || [];
 
-  // Tüm ilgili öğrenciler: onaylananlar + bekleyenler
   const allStudents = [
     ...(data.approvedStudents || []),
     ...(data.students || []),
   ];
 
-  // Kaç öğrenci seçilebilir
   const selectionLimit = teacher.hasFinalized
     ? teacher.maxQuota
     : teacher.maxQuota - teacher.currentCount;
@@ -89,25 +87,25 @@ const StudentApprovalPage = () => {
 
   return (
     <div className="p-6 w-full">
-      <h1 className="text-xl font-semibold mb-1">Öğrenci Onay Listesi</h1>
-      <p className="text-sm text-gray-500 mb-4">{teacher.name}</p>
+      <h1 className="text-xl font-semibold mb-1 text-gray-900 dark:text-gray-100">Öğrenci Onay Listesi</h1>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{teacher.name}</p>
 
       {/* Onay ilerleme çubuğu */}
-      <div className="mb-5 p-3 bg-gray-50 border rounded-xl flex items-center gap-3 text-sm">
-        <div className="flex-1 bg-gray-200 rounded-full h-2">
+      <div className="mb-5 p-3 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-xl flex items-center gap-3 text-sm">
+        <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
           <div
-            className="bg-gray-700 h-2 rounded-full transition-all"
+            className="bg-gray-700 dark:bg-gray-300 h-2 rounded-full transition-all"
             style={{ width: `${totalTeachers > 0 ? (finalizedCount / totalTeachers) * 100 : 0}%` }}
           />
         </div>
-        <span className="text-gray-600 whitespace-nowrap">
+        <span className="text-gray-600 dark:text-gray-300 whitespace-nowrap">
           {finalizedCount}/{totalTeachers} hoca onayladı
         </span>
       </div>
 
       {/* Otomatik atama tarihi */}
       {formConfig?.cascadeDate && !formConfig?.cascadeExecuted && (
-        <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-xl text-xs text-orange-700">
+        <div className="mb-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl text-xs text-orange-700 dark:text-orange-300">
           Son tarih:{" "}
           <span className="font-medium">
             {new Date(formConfig.cascadeDate).toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" })}
@@ -116,7 +114,7 @@ const StudentApprovalPage = () => {
         </div>
       )}
       {formConfig?.cascadeExecuted && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-700">
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl text-xs text-green-700 dark:text-green-400">
           Otomatik atama tamamlandı.
         </div>
       )}
@@ -125,8 +123,8 @@ const StudentApprovalPage = () => {
       {teacher.hasFinalized && (
         <div className={`mb-4 p-3 rounded-xl border text-sm ${
           isDone
-            ? "bg-green-50 border-green-200 text-green-700"
-            : "bg-blue-50 border-blue-200 text-blue-700"
+            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400"
+            : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
         }`}>
           {isDone
             ? "Tüm hocalar onayladı. Admin otomatik atamayı başlatacak."
@@ -136,17 +134,15 @@ const StudentApprovalPage = () => {
         </div>
       )}
 
-      {/* Güncelleme mesajı */}
       {resultMsg && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm flex items-center justify-between">
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-blue-700 dark:text-blue-300 text-sm flex items-center justify-between">
           <span>{resultMsg}</span>
           <button onClick={() => setResultMsg("")} className="text-blue-400 hover:text-blue-600 ml-3">✕</button>
         </div>
       )}
 
-      {/* Hata mesajı */}
       {finalizeError && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center justify-between">
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm flex items-center justify-between">
           <span>{finalizeError}</span>
           <button onClick={() => setFinalizeError("")} className="text-red-400 hover:text-red-600 ml-3">✕</button>
         </div>
@@ -160,25 +156,23 @@ const StudentApprovalPage = () => {
           { label: "Kalan Limit",  value: selectionLimit - selectedIds.size, red: selectionLimit - selectedIds.size === 0 },
           { label: "Maks",         value: teacher.maxQuota },
         ].map(({ label, value, highlight, red }) => (
-          <div key={label} className="bg-white border rounded-lg px-4 py-2.5 text-sm">
+          <div key={label} className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-4 py-2.5 text-sm">
             <span className="text-gray-400">{label}: </span>
-            <span className={`font-semibold ${highlight ? "text-blue-600" : red ? "text-red-500" : ""}`}>
+            <span className={`font-semibold ${highlight ? "text-blue-600" : red ? "text-red-500" : "text-gray-900 dark:text-gray-100"}`}>
               {value}
             </span>
           </div>
         ))}
       </div>
 
-      {/* Kontenjan dolu uyarısı */}
       {selectionLimit === 0 && allStudents.length > 0 && (
-        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
+        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-yellow-700 dark:text-yellow-300 text-sm">
           Kontenjanınız dolmuş. Tüm öğrenciler otomatik atama bekleyecek.
         </div>
       )}
 
-      {/* Boş liste */}
       {allStudents.length === 0 && (
-        <div className="text-gray-400 text-sm py-10 text-center bg-white border rounded-lg">
+        <div className="text-gray-400 text-sm py-10 text-center bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg">
           1. tercih listenizdeki öğrenci yok.
         </div>
       )}
@@ -186,10 +180,10 @@ const StudentApprovalPage = () => {
       {/* Öğrenci tablosu */}
       {allStudents.length > 0 && (
         <>
-          <div className="bg-white border rounded-lg overflow-x-auto mb-4">
+          <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg overflow-x-auto mb-4">
            <div className="min-w-max">
             <div
-              className="grid bg-gray-100 text-xs font-semibold p-3"
+              className="grid bg-gray-100 dark:bg-gray-800 text-xs font-semibold p-3 text-gray-500 dark:text-gray-400"
               style={{ gridTemplateColumns: `40px repeat(${columns.length + 1}, minmax(140px,1fr))` }}
             >
               <div />
@@ -205,12 +199,12 @@ const StudentApprovalPage = () => {
                 <div
                   key={s._id}
                   onClick={() => { if (!isDisabled) toggleSelect(s._id); }}
-                  className={`grid items-center p-3 border-t text-sm cursor-pointer transition-colors
+                  className={`grid items-center p-3 border-t dark:border-gray-700 text-sm cursor-pointer transition-colors
                     ${isSelected
-                      ? "bg-blue-50 border-l-2 border-l-blue-400"
+                      ? "bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-blue-400"
                       : isDisabled
                       ? "opacity-40 cursor-not-allowed"
-                      : "hover:bg-gray-50"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-800"
                     }`}
                   style={{ gridTemplateColumns: `40px repeat(${columns.length + 1}, minmax(140px,1fr))` }}
                 >
@@ -223,7 +217,9 @@ const StudentApprovalPage = () => {
                     className="cursor-pointer w-4 h-4"
                   />
                   {columns.map((col: any) => (
-                    <div key={col.key}>{s.formData?.[col.key] || "-"}</div>
+                    <div key={col.key} className="text-gray-700 dark:text-gray-200">
+                      {s.formData?.[col.key] || "-"}
+                    </div>
                   ))}
                   <div className="text-xs text-gray-400 space-y-0.5">
                     {s.preferences.map((p: any, i: number) => (
@@ -238,28 +234,29 @@ const StudentApprovalPage = () => {
 
           {/* Onay / güncelleme bölümü */}
           {showConfirm ? (
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl space-y-3">
-              <p className="text-sm text-gray-700">
+            <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl space-y-3">
+              <p className="text-sm text-gray-700 dark:text-gray-200">
                 <span className="font-semibold">{selectedIds.size} öğrenci</span> onaylanacak.
                 {allStudents.length - selectedIds.size > 0 && (
                   <> <span className="font-semibold">{allStudents.length - selectedIds.size} öğrenci</span> onaylanmayacak — atama bekleyecek.</>
                 )}
               </p>
               {teacher.hasFinalized && (
-                <p className="text-xs text-orange-600">Önceki seçimler sıfırlanıp yeniden uygulanacak.</p>
+                <p className="text-xs text-orange-600 dark:text-orange-400">Önceki seçimler sıfırlanıp yeniden uygulanacak.</p>
               )}
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleFinalize}
                   disabled={loading}
-                  className="px-5 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium
-                  hover:bg-black transition disabled:opacity-50"
+                  className="px-5 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-sm font-medium
+                  hover:bg-black dark:hover:bg-gray-100 transition disabled:opacity-50"
                 >
                   {loading ? "İşleniyor..." : "Evet, Onayla"}
                 </button>
                 <button
                   onClick={() => setShowConfirm(false)}
-                  className="px-5 py-2 border rounded-lg text-sm text-gray-600 hover:bg-white transition"
+                  className="px-5 py-2 border dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-300
+                  hover:bg-white dark:hover:bg-gray-800 transition"
                 >
                   İptal
                 </button>
@@ -270,8 +267,8 @@ const StudentApprovalPage = () => {
               <button
                 onClick={() => setShowConfirm(true)}
                 disabled={loading}
-                className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium
-                hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl text-sm font-medium
+                hover:bg-black dark:hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {teacher.hasFinalized ? "Seçimleri Güncelle" : "Onayla ve Tamamla"}
               </button>

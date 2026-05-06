@@ -26,6 +26,7 @@ const AssignedStudentsPage = () => {
     }
   };
 
+  useEffect(() => { document.title = "Atama Sonuçları"; }, []);
   useEffect(() => {
     fetchAll();
   }, []);
@@ -46,25 +47,15 @@ const AssignedStudentsPage = () => {
 
   const exportTeacherExcel = (teacher: any, group: any[]) => {
     const columns: any[] = formConfig?.textFields || [];
-
-    // Başlık satırı: form alanları
     const header = columns.map((col: any) => col.label);
-
-    // Veri satırları
     const rows = group.map((s) =>
       columns.map((col: any) => s.formData?.[col.key] ?? ""),
     );
 
     const wsData = [header, ...rows];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // Sütun genişliklerini otomatik ayarla
     ws["!cols"] = header.map((_: any, i: number) => ({
-      wch: Math.max(
-        header[i].length,
-        ...rows.map((r) => String(r[i] ?? "").length),
-        12,
-      ),
+      wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 12),
     }));
 
     const wb = XLSX.utils.book_new();
@@ -85,13 +76,13 @@ const AssignedStudentsPage = () => {
 
   return (
     <div className="p-4 sm:p-6 w-full">
-      <h1 className="text-xl font-semibold mb-1">Atama Sonuçları</h1>
+      <h1 className="text-xl font-semibold mb-1 text-gray-900 dark:text-gray-100">Atama Sonuçları</h1>
       <p className="text-sm text-gray-400 mb-4">
         Atanan: {assigned.length} · Atanmayan: {unassigned.length} · Toplam: {students.length}
       </p>
 
       {assignError && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 flex items-center justify-between">
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 dark:text-red-400 flex items-center justify-between">
           <span>{assignError}</span>
           <button onClick={() => setAssignError("")} className="ml-3 text-red-400 hover:text-red-600">✕</button>
         </div>
@@ -100,8 +91,7 @@ const AssignedStudentsPage = () => {
       {/* Hocaya göre gruplar */}
       {teachers.map((teacher) => {
         const group = assigned.filter(
-          (s) =>
-            s.assignedTeacher?._id?.toString() === teacher._id?.toString(),
+          (s) => s.assignedTeacher?._id?.toString() === teacher._id?.toString(),
         );
         if (group.length === 0) return null;
 
@@ -109,25 +99,25 @@ const AssignedStudentsPage = () => {
           <div key={teacher._id} className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-3">
-                <h2 className="text-base font-semibold">{teacher.name}</h2>
+                <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{teacher.name}</h2>
                 <span className="text-xs text-gray-400">
                   {group.length} / {teacher.maxQuota} öğrenci
                 </span>
               </div>
               <button
                 onClick={() => exportTeacherExcel(teacher, group)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-300
-                rounded-lg text-gray-600 hover:bg-gray-50 transition"
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-300 dark:border-gray-600
+                rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
               >
                 ↓ Excel İndir
               </button>
             </div>
 
-            <div className="bg-white border rounded-lg overflow-x-auto">
+            <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-lg overflow-x-auto">
               <div className="min-w-max">
                 {columns.length > 0 && (
                   <div
-                    className="grid bg-gray-100 text-xs font-medium p-3"
+                    className="grid bg-gray-100 dark:bg-gray-800 text-xs font-medium p-3 text-gray-600 dark:text-gray-300"
                     style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr))` }}
                   >
                     {columns.map((col: any) => (
@@ -138,7 +128,7 @@ const AssignedStudentsPage = () => {
                 {group.map((s) => (
                   <div
                     key={s._id}
-                    className="grid items-center p-3 border-t text-sm"
+                    className="grid items-center p-3 border-t dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200"
                     style={{
                       gridTemplateColumns: columns.length > 0
                         ? `repeat(${columns.length}, minmax(120px, 1fr))`
@@ -170,11 +160,11 @@ const AssignedStudentsPage = () => {
             <span className="text-xs text-red-400">{unassigned.length} öğrenci</span>
           </div>
 
-          <div className="bg-white border border-red-100 rounded-lg overflow-x-auto">
+          <div className="bg-white dark:bg-gray-900 border border-red-100 dark:border-red-900/50 rounded-lg overflow-x-auto">
             <div className="min-w-max">
               {columns.length > 0 && (
                 <div
-                  className="grid bg-red-50 text-xs font-medium p-3"
+                  className="grid bg-red-50 dark:bg-red-900/20 text-xs font-medium p-3 text-gray-600 dark:text-gray-300"
                   style={{
                     gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr)) 180px 160px`,
                   }}
@@ -189,7 +179,7 @@ const AssignedStudentsPage = () => {
               {unassigned.map((s) => (
                 <div
                   key={s._id}
-                  className="grid items-center p-3 border-t text-sm"
+                  className="grid items-center p-3 border-t dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200"
                   style={{
                     gridTemplateColumns: columns.length > 0
                       ? `repeat(${columns.length}, minmax(120px, 1fr)) 180px 160px`
@@ -208,7 +198,9 @@ const AssignedStudentsPage = () => {
                     <select
                       value={selectedTeacher[s._id] || ""}
                       onChange={(e) => setSelectedTeacher((prev) => ({ ...prev, [s._id]: e.target.value }))}
-                      className="border rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900"
+                      className="border dark:border-gray-600 rounded px-2 py-1.5 text-xs
+                      bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200
+                      focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-100"
                     >
                       <option value="">Hoca seç...</option>
                       {teachers
@@ -222,8 +214,8 @@ const AssignedStudentsPage = () => {
                     <button
                       onClick={() => handleAssign(s._id)}
                       disabled={!selectedTeacher[s._id] || assigning === s._id}
-                      className="text-xs px-2 py-1.5 bg-gray-900 text-white rounded
-                      disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black transition"
+                      className="text-xs px-2 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded
+                      disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black dark:hover:bg-gray-100 transition"
                     >
                       {assigning === s._id ? "Atanıyor..." : "Ata"}
                     </button>

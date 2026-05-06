@@ -25,6 +25,8 @@ const Dashboard = () => {
     }
   };
 
+  useEffect(() => { document.title = "Dashboard"; }, []);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -68,27 +70,27 @@ const Dashboard = () => {
   return (
     <div className="p-4 sm:p-6 w-full max-w-3xl mx-auto">
 
-      {/* ── Başlık ───────────────────────────────────────────────────────── */}
+      {/* ── Başlık ─────────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Dashboard</h1>
           <p className="text-sm text-gray-400 mt-0.5">Danışman Atama Sistemi</p>
         </div>
         <button
           onClick={fetchData}
-          className="flex items-center gap-1.5 text-sm text-gray-500 border rounded-lg
-          px-3 py-1.5 hover:bg-gray-50 hover:text-gray-700 transition"
+          className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 border dark:border-gray-700 rounded-lg
+          px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 transition"
         >
           <span className="text-base leading-none">↻</span> Yenile
         </button>
       </div>
 
-      {/* ── Form durumu ──────────────────────────────────────────────────── */}
+      {/* ── Form durumu ────────────────────────────────────────────── */}
       <div
         className={`flex items-center justify-between px-4 py-3 rounded-xl border mb-6 ${
           formStatus?.isOpen
-            ? "bg-green-50 border-green-200"
-            : "bg-gray-50 border-gray-200"
+            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+            : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
         }`}
       >
         <div className="flex items-center gap-3">
@@ -98,10 +100,10 @@ const Dashboard = () => {
             }`}
           />
           <div>
-            <span className="text-sm font-medium text-gray-700">Başvuru Formu</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Başvuru Formu</span>
             <span
               className={`ml-2 text-sm font-semibold ${
-                formStatus?.isOpen ? "text-green-600" : "text-gray-500"
+                formStatus?.isOpen ? "text-green-600" : "text-gray-500 dark:text-gray-400"
               }`}
             >
               {formStatus?.isOpen ? "Açık" : "Kapalı"}
@@ -115,14 +117,14 @@ const Dashboard = () => {
         </div>
         <Link
           to="/admin/form"
-          className="text-xs text-gray-500 border rounded px-2 py-1
-          hover:bg-white hover:text-gray-700 transition"
+          className="text-xs text-gray-500 dark:text-gray-400 border dark:border-gray-600 rounded px-2 py-1
+          hover:bg-white dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-200 transition"
         >
           Ayarla
         </Link>
       </div>
 
-      {/* ── İstatistikler ────────────────────────────────────────────────── */}
+      {/* ── İstatistikler ──────────────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
         {[
           { label: "Toplam Başvuru", value: studentCount, color: "" },
@@ -130,24 +132,24 @@ const Dashboard = () => {
           { label: "Bekleyen",       value: unassignedCount, color: unassignedCount > 0 ? "text-red-500" : "" },
           { label: "Danışman",       value: teacherCount,    color: "" },
         ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white border rounded-xl p-4">
+          <div key={label} className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl p-4">
             <p className="text-xs text-gray-400 mb-1">{label}</p>
-            <p className={`text-3xl font-bold ${color || "text-gray-900"}`}>{value}</p>
+            <p className={`text-3xl font-bold ${color || "text-gray-900 dark:text-gray-100"}`}>{value}</p>
           </div>
         ))}
       </div>
 
-      {/* ── Atama ilerleme çubuğu ────────────────────────────────────────── */}
+      {/* ── Atama ilerleme çubuğu ──────────────────────────────────── */}
       {studentCount > 0 && (
-        <div className="bg-white border rounded-xl p-5 mb-5">
+        <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl p-5 mb-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Atama Durumu</span>
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Atama Durumu</span>
+            <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {assignedCount} / {studentCount}
               <span className="text-xs font-normal text-gray-400 ml-1">(%{assignedPct})</span>
             </span>
           </div>
-          <div className="w-full bg-gray-100 rounded-full h-2">
+          <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
             <div
               className={`h-2 rounded-full transition-all duration-500 ${
                 assignedPct === 100 ? "bg-green-500" : "bg-blue-500"
@@ -162,19 +164,18 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* ── Hoca onay durumu ─────────────────────────────────────────────── */}
+      {/* ── Hoca onay durumu ───────────────────────────────────────── */}
       {teachers && teachers.length > 0 && (
-        <div className="bg-white border rounded-xl p-5">
-          {/* Başlık + progress */}
+        <div className="bg-white dark:bg-gray-900 border dark:border-gray-700 rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-sm font-semibold text-gray-700">Danışman Onay Durumu</h2>
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Danışman Onay Durumu</h2>
               <p className="text-xs text-gray-400 mt-0.5">
                 {finalizedCount} / {teacherCount} tamamladı
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-28 bg-gray-100 rounded-full h-1.5">
+              <div className="w-28 bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
                 <div
                   className={`h-1.5 rounded-full transition-all duration-500 ${
                     allFinalized ? "bg-green-500" : "bg-blue-500"
@@ -196,18 +197,22 @@ const Dashboard = () => {
               <div
                 key={t._id}
                 className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm ${
-                  t.hasFinalized ? "bg-green-50" : "bg-gray-50"
+                  t.hasFinalized
+                    ? "bg-green-50 dark:bg-green-900/20"
+                    : "bg-gray-50 dark:bg-gray-800"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <span
                     className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                      t.hasFinalized ? "bg-green-500" : "bg-gray-300"
+                      t.hasFinalized ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
                     }`}
                   />
                   <span
                     className={
-                      t.hasFinalized ? "text-gray-700 font-medium" : "text-gray-400"
+                      t.hasFinalized
+                        ? "text-gray-700 dark:text-gray-200 font-medium"
+                        : "text-gray-400 dark:text-gray-500"
                     }
                   >
                     {t.name}
@@ -215,9 +220,9 @@ const Dashboard = () => {
                 </div>
                 <div className="flex items-center gap-2 sm:gap-4">
                   <div className="hidden sm:flex items-center gap-1.5">
-                    <div className="w-16 bg-gray-200 rounded-full h-1">
+                    <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1">
                       <div
-                        className="bg-gray-400 h-1 rounded-full"
+                        className="bg-gray-400 dark:bg-gray-500 h-1 rounded-full"
                         style={{
                           width: `${t.maxQuota > 0 ? Math.min((t.currentCount / t.maxQuota) * 100, 100) : 0}%`,
                         }}
@@ -242,27 +247,25 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* ── Cascade bölümü ─────────────────────────────────────────── */}
-          <div className="pt-3 border-t space-y-3">
-            {/* Otomatik atama tarihi */}
+          {/* ── Cascade bölümü ──────────────────────────────────────── */}
+          <div className="pt-3 border-t dark:border-gray-700 space-y-3">
             {formStatus?.cascadeDate && (
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-500">
+                <span className="text-gray-500 dark:text-gray-400">
                   Otomatik atama: {formatDate(formStatus.cascadeDate)}
                 </span>
                 <span className={`px-2 py-0.5 rounded-full font-medium ${
                   formStatus.cascadeExecuted
-                    ? "bg-green-100 text-green-700"
-                    : "bg-orange-100 text-orange-700"
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                    : "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400"
                 }`}>
                   {formStatus.cascadeExecuted ? "Tamamlandı" : "Bekliyor"}
                 </span>
               </div>
             )}
 
-            {/* Cascade sonucu */}
             {cascadeResult && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-center justify-between">
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex items-center justify-between">
                 <span>
                   Atama tamamlandı — Atanan: {cascadeResult.assignedCount},
                   Bekleyen: {cascadeResult.unassignedCount}
@@ -276,7 +279,7 @@ const Dashboard = () => {
               </div>
             )}
             {cascadeResult && cascadeResult.unassignedCount > 0 && (
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700 flex items-center justify-between">
+              <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg text-xs text-orange-700 dark:text-orange-300 flex items-center justify-between">
                 <span>{cascadeResult.unassignedCount} öğrenci atanamadı — kapasite yetersiz.</span>
                 <Link
                   to="/admin/assignedStudents"
@@ -287,7 +290,7 @@ const Dashboard = () => {
               </div>
             )}
             {cascadeError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 flex items-center justify-between">
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-xs text-red-600 dark:text-red-400 flex items-center justify-between">
                 <span>{cascadeError}</span>
                 <button
                   onClick={() => setCascadeError("")}
@@ -298,10 +301,9 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* Onay kutusu */}
             {!cascadeResult && showCascadeConfirm ? (
-              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2">
-                <p className="text-xs text-gray-600">
+              <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg space-y-2">
+                <p className="text-xs text-gray-600 dark:text-gray-300">
                   Onaylanmayan öğrenciler 2. tercihlerinden itibaren atanacak.
                   Bu işlem geri alınamaz.
                 </p>
@@ -316,8 +318,8 @@ const Dashboard = () => {
                   </button>
                   <button
                     onClick={() => setShowCascadeConfirm(false)}
-                    className="text-xs px-3 py-1.5 border rounded-lg text-gray-600
-                    hover:bg-gray-50 transition"
+                    className="text-xs px-3 py-1.5 border dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-300
+                    hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                   >
                     İptal
                   </button>
@@ -335,8 +337,8 @@ const Dashboard = () => {
                     setShowCascadeConfirm(true);
                   }}
                   disabled={cascading}
-                  className="text-xs px-3 py-1.5 border border-orange-300 text-orange-600
-                  rounded-lg hover:bg-orange-50 transition disabled:opacity-50 flex-shrink-0"
+                  className="text-xs px-3 py-1.5 border border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-400
+                  rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition disabled:opacity-50 flex-shrink-0"
                 >
                   Manuel Başlat
                 </button>
