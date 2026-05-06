@@ -10,6 +10,7 @@ import TeachersPage from "./pages/admin/TeachersPage";
 import FormSettingsPage from "./pages/admin/FormSettingsPage";
 import AssignedStudentsPage from "./pages/admin/AssignedStudentsPage";
 import StudentApprovalPage from "./pages/teacher/StudentApprovalPage";
+import ProfilePage from "./pages/teacher/ProfilePage";
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
       >
         <Route index element={<Navigate to="students" replace />} />
         <Route path="students" element={<StudentApprovalPage />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
     </Routes>
   );

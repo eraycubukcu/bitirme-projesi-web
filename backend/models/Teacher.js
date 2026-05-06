@@ -36,6 +36,11 @@ const teacherSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    bio: {
+      type: String,
+      default: "",
+      maxlength: 1000,
+    },
   },
   { timestamps: true },
 );

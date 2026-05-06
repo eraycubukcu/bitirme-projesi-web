@@ -128,6 +128,23 @@ export const getMyStudents = async (req, res) => {
   }
 };
 
+export const updateMyProfile = async (req, res) => {
+  try {
+    const { bio } = req.body;
+    if (typeof bio !== "string") {
+      return res.status(400).json({ message: "Geçersiz veri." });
+    }
+    const teacher = await Teacher.findByIdAndUpdate(
+      req.teacher._id,
+      { bio: bio.trim().slice(0, 1000) },
+      { new: true }
+    );
+    res.json({ message: "Profil güncellendi.", teacher });
+  } catch (error) {
+    res.status(500).json({ message: "Server hatası" });
+  }
+};
+
 export const finalizeApproval = async (req, res) => {
   try {
     const teacherId = req.teacher._id;

@@ -261,8 +261,15 @@ function FormPage() {
                 className="flex justify-between border dark:border-zinc-800 p-2 rounded-md"
               >
                 <div className="flex gap-3">
-                  <span className="text-gray-400">{index + 1}</span>
-                  <span className="text-gray-800 dark:text-white">{teacher.name}</span>
+                  <span className="text-gray-400 mt-0.5">{index + 1}</span>
+                  <div>
+                    <p className="text-gray-800 dark:text-white text-sm">{teacher.name}</p>
+                    {teacher.bio && (
+                      <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5 leading-relaxed">
+                        {teacher.bio}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex gap-1">

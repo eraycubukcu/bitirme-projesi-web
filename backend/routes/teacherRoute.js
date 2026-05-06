@@ -4,6 +4,7 @@ import {
   teacherLogin,
   getMyStudents,
   finalizeApproval,
+  updateMyProfile,
   createTeacher,
   updateTeacher,
   deleteTeacher,
@@ -27,6 +28,7 @@ router.post("/login", loginLimiter, teacherLogin);
 // Hoca paneli (teacher auth)
 router.get("/my-students", protectTeacher, getMyStudents);
 router.post("/finalize", protectTeacher, finalizeApproval);
+router.put("/profile", protectTeacher, updateMyProfile);
 
 // Admin CRUD (admin auth) — parameterized route en sona
 router.get("/", getTeachers);
