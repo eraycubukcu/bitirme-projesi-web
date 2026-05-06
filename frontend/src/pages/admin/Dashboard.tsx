@@ -243,107 +243,110 @@ const Dashboard = () => {
           </div>
 
           {/* ── Cascade bölümü ─────────────────────────────────────────── */}
-          {allFinalized ? (
-            <div className="space-y-1.5">
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
-                Tüm danışmanlar onayladı. Otomatik atama gerçekleştirildi.
+          <div className="pt-3 border-t space-y-3">
+            {/* Otomatik atama tarihi */}
+            {formStatus?.cascadeDate && (
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">
+                  Otomatik atama: {formatDate(formStatus.cascadeDate)}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full font-medium ${
+                  formStatus.cascadeExecuted
+                    ? "bg-green-100 text-green-700"
+                    : "bg-orange-100 text-orange-700"
+                }`}>
+                  {formStatus.cascadeExecuted ? "Tamamlandı" : "Bekliyor"}
+                </span>
               </div>
-              {unassignedCount > 0 && (
-                <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700 flex items-center justify-between">
-                  <span>{unassignedCount} öğrenci atanamadı — kapasite yetersiz.</span>
-                  <Link
-                    to="/admin/assignedStudents"
-                    className="underline font-medium ml-2 flex-shrink-0"
-                  >
-                    Manuel ata →
-                  </Link>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="pt-3 border-t space-y-3">
-              {/* Cascade sonucu */}
-              {cascadeResult && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-center justify-between">
-                  <span>
-                    {cascadeResult.message} — Atanan: {cascadeResult.assignedCount},
-                    Bekleyen: {cascadeResult.unassignedCount}
-                  </span>
-                  <button
-                    onClick={() => setCascadeResult(null)}
-                    className="ml-3 text-blue-400 hover:text-blue-600 flex-shrink-0"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-              {cascadeError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 flex items-center justify-between">
-                  <span>{cascadeError}</span>
-                  <button
-                    onClick={() => setCascadeError("")}
-                    className="ml-3 text-red-400 hover:text-red-600 flex-shrink-0"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
+            )}
 
-              {/* Onay kutusu */}
-              {showCascadeConfirm ? (
-                <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2">
-                  {notFinished.length > 0 && (
-                    <p className="text-xs text-orange-700">
-                      <span className="font-medium">{notFinished.length} danışman</span> henüz
-                      onaylamadı:{" "}
-                      {notFinished.map((t: any) => t.name).join(", ")}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-600">
-                    Onaylanmayan öğrenciler 2. tercihlerinden itibaren atanacak.
-                    Bu işlem geri alınamaz.
-                  </p>
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={handleCascade}
-                      disabled={cascading}
-                      className="text-xs px-3 py-1.5 bg-orange-500 text-white rounded-lg
-                      hover:bg-orange-600 transition disabled:opacity-50"
-                    >
-                      {cascading ? "Çalışıyor..." : "Evet, Başlat"}
-                    </button>
-                    <button
-                      onClick={() => setShowCascadeConfirm(false)}
-                      className="text-xs px-3 py-1.5 border rounded-lg text-gray-600
-                      hover:bg-gray-50 transition"
-                    >
-                      İptal
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-gray-400">
-                    {finalizedCount === teacherCount
-                      ? "Otomatik atama başlatılmaya hazır."
-                      : "Tüm danışmanlar onayladığında otomatik atama başlar."}
-                  </p>
+            {/* Cascade sonucu */}
+            {cascadeResult && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-center justify-between">
+                <span>
+                  Atama tamamlandı — Atanan: {cascadeResult.assignedCount},
+                  Bekleyen: {cascadeResult.unassignedCount}
+                </span>
+                <button
+                  onClick={() => setCascadeResult(null)}
+                  className="ml-3 text-blue-400 hover:text-blue-600 flex-shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            {cascadeResult && cascadeResult.unassignedCount > 0 && (
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-xs text-orange-700 flex items-center justify-between">
+                <span>{cascadeResult.unassignedCount} öğrenci atanamadı — kapasite yetersiz.</span>
+                <Link
+                  to="/admin/assignedStudents"
+                  className="underline font-medium ml-2 flex-shrink-0"
+                >
+                  Manuel ata →
+                </Link>
+              </div>
+            )}
+            {cascadeError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 flex items-center justify-between">
+                <span>{cascadeError}</span>
+                <button
+                  onClick={() => setCascadeError("")}
+                  className="ml-3 text-red-400 hover:text-red-600 flex-shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Onay kutusu */}
+            {!cascadeResult && showCascadeConfirm ? (
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2">
+                <p className="text-xs text-gray-600">
+                  Onaylanmayan öğrenciler 2. tercihlerinden itibaren atanacak.
+                  Bu işlem geri alınamaz.
+                </p>
+                <div className="flex gap-2 pt-1">
                   <button
-                    onClick={() => {
-                      setCascadeResult(null);
-                      setCascadeError("");
-                      setShowCascadeConfirm(true);
-                    }}
+                    onClick={handleCascade}
                     disabled={cascading}
-                    className="text-xs px-3 py-1.5 border border-orange-300 text-orange-600
-                    rounded-lg hover:bg-orange-50 transition disabled:opacity-50 flex-shrink-0"
+                    className="text-xs px-3 py-1.5 bg-orange-500 text-white rounded-lg
+                    hover:bg-orange-600 transition disabled:opacity-50"
                   >
-                    Manuel Başlat
+                    {cascading ? "Çalışıyor..." : "Evet, Başlat"}
+                  </button>
+                  <button
+                    onClick={() => setShowCascadeConfirm(false)}
+                    className="text-xs px-3 py-1.5 border rounded-lg text-gray-600
+                    hover:bg-gray-50 transition"
+                  >
+                    İptal
                   </button>
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            ) : !cascadeResult && allFinalized ? (
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-gray-400">
+                  Tüm danışmanlar onayladı. Atamayı başlatabilirsiniz.
+                </p>
+                <button
+                  onClick={() => {
+                    setCascadeResult(null);
+                    setCascadeError("");
+                    setShowCascadeConfirm(true);
+                  }}
+                  disabled={cascading}
+                  className="text-xs px-3 py-1.5 border border-orange-300 text-orange-600
+                  rounded-lg hover:bg-orange-50 transition disabled:opacity-50 flex-shrink-0"
+                >
+                  Manuel Başlat
+                </button>
+              </div>
+            ) : !cascadeResult ? (
+              <p className="text-xs text-gray-400">
+                Tüm danışmanlar onayladığında atamayı başlatabilirsiniz. ({finalizedCount}/{teacherCount})
+              </p>
+            ) : null}
+          </div>
         </div>
       )}
     </div>

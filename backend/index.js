@@ -7,6 +7,8 @@ import adminRoutes from "./routes/adminRoute.js";
 import teacherRoutes from "./routes/teacherRoute.js";
 import formRoutes from "./routes/formRoute.js";
 import studentRoutes from "./routes/studentRoute.js";
+import FormConfig from "./models/FormConfig.js";
+import { runCascade } from "./controllers/teacherController.js";
 
 dotenv.config();
 
@@ -65,3 +67,19 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Sunucu ${PORT} portunda çalışıyor.`);
 });
+
+// ── Otomatik cascade zamanlayıcısı (her 60 saniyede bir kontrol) ──────────────
+setInterval(async () => {
+  try {
+    const form = await FormConfig.findOne();
+    if (!form?.cascadeDate || form.cascadeExecuted) return;
+    if (new Date(form.cascadeDate) > new Date()) return;
+
+    console.log("[Zamanlayıcı] Otomatik atama tarihi geldi, çalıştırılıyor...");
+    await runCascade();
+    await FormConfig.findByIdAndUpdate(form._id, { cascadeExecuted: true });
+    console.log("[Zamanlayıcı] Otomatik cascade tamamlandı.");
+  } catch (err) {
+    console.error("[Zamanlayıcı] Cascade hatası:", err.message);
+  }
+}, 60_000);

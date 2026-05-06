@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path . -Force)",
+      "Bash(Select-Object -Property Name, Mode)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(xargs ls *)",
+      "Bash(awk '{print $NF}')",
+      "Bash(Get-ChildItem -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(git checkout *)",
+      "Bash(Get-ChildItem *)",
+      "Bash(node *)"
+    ]
+  }
+}

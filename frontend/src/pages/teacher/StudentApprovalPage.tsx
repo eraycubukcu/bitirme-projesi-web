@@ -3,6 +3,7 @@ import api from "../../services/api";
 
 interface PageData {
   students: any[];
+  approvedStudents: any[];
   teacher: any;
   finalizedCount: number;
   totalTeachers: number;
@@ -24,8 +25,13 @@ const StudentApprovalPage = () => {
         api.get("/teachers/my-students"),
         api.get("/form"),
       ]);
-      setData(myRes.data);
+      const d: PageData = myRes.data;
+      setData(d);
       setFormConfig(formRes.data);
+      // Onaylanmış öğrencileri pre-select et
+      if (d.teacher.hasFinalized) {
+        setSelectedIds(new Set((d.approvedStudents || []).map((s: any) => s._id)));
+      }
     } catch {
       setFetchError("Veriler yüklenemedi.");
     }
@@ -36,16 +42,26 @@ const StudentApprovalPage = () => {
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
   if (!data || !formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
 
-  const { students, teacher, finalizedCount, totalTeachers } = data;
-  const remainingQuota = teacher.maxQuota - teacher.currentCount;
+  const { teacher, finalizedCount, totalTeachers } = data;
   const columns: any[] = formConfig.textFields || [];
+
+  // Tüm ilgili öğrenciler: onaylananlar + bekleyenler
+  const allStudents = [
+    ...(data.approvedStudents || []),
+    ...(data.students || []),
+  ];
+
+  // Kaç öğrenci seçilebilir
+  const selectionLimit = teacher.hasFinalized
+    ? teacher.maxQuota
+    : teacher.maxQuota - teacher.currentCount;
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
-      } else if (next.size < remainingQuota) {
+      } else if (next.size < selectionLimit) {
         next.add(id);
       }
       return next;
@@ -61,7 +77,6 @@ const StudentApprovalPage = () => {
         approvedStudentIds: Array.from(selectedIds),
       });
       setResultMsg(res.data.message);
-      setSelectedIds(new Set());
       await fetchData();
     } catch (err: any) {
       setFinalizeError(err.response?.data?.message || "Hata oluştu.");
@@ -70,42 +85,8 @@ const StudentApprovalPage = () => {
     }
   };
 
-  // ── Hoca zaten onayladı ───────────────────────────────────────────────────
-  if (teacher.hasFinalized) {
-    const isDone = finalizedCount === totalTeachers;
-    return (
-      <div className="p-6 max-w-lg">
-        <h1 className="text-xl font-semibold mb-1">Öğrenci Onay Listesi</h1>
-        <p className="text-sm text-gray-500 mb-6">{teacher.name}</p>
+  const isDone = finalizedCount === totalTeachers;
 
-        <div
-          className={`p-5 rounded-xl border ${
-            isDone ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"
-          }`}
-        >
-          <p className={`font-semibold mb-1 ${isDone ? "text-green-700" : "text-blue-700"}`}>
-            {isDone
-              ? "Tüm hocalar onayladı. Otomatik atama gerçekleştirildi."
-              : "Onayınız alındı."}
-          </p>
-          {!isDone && (
-            <p className="text-sm text-blue-600">
-              {finalizedCount}/{totalTeachers} hoca tamamladı. Diğer hocalar
-              tamamladığında öğrenciler otomatik atanacak.
-            </p>
-          )}
-        </div>
-
-        {!isDone && (
-          <button onClick={fetchData} className="mt-4 text-sm text-gray-500 underline">
-            Durumu yenile
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  // ── Onay bekliyor ─────────────────────────────────────────────────────────
   return (
     <div className="p-6 w-full">
       <h1 className="text-xl font-semibold mb-1">Öğrenci Onay Listesi</h1>
@@ -124,24 +105,38 @@ const StudentApprovalPage = () => {
         </span>
       </div>
 
-      {/* Kontenjan bilgisi */}
-      <div className="flex flex-wrap gap-2 mb-5">
-        {[
-          { label: "Bekleyen",         value: students.length },
-          { label: "Seçili",           value: selectedIds.size, highlight: true },
-          { label: "Kalan Kontenjan",  value: remainingQuota, red: remainingQuota === 0 },
-          { label: "Maks",             value: teacher.maxQuota },
-        ].map(({ label, value, highlight, red }) => (
-          <div key={label} className="bg-white border rounded-lg px-4 py-2.5 text-sm">
-            <span className="text-gray-400">{label}: </span>
-            <span className={`font-semibold ${highlight ? "text-blue-600" : red ? "text-red-500" : ""}`}>
-              {value}
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* Otomatik atama tarihi */}
+      {formConfig?.cascadeDate && !formConfig?.cascadeExecuted && (
+        <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded-xl text-xs text-orange-700">
+          Son tarih:{" "}
+          <span className="font-medium">
+            {new Date(formConfig.cascadeDate).toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" })}
+          </span>
+          {" "}— Bu tarihe kadar seçimlerinizi tamamlayınız.
+        </div>
+      )}
+      {formConfig?.cascadeExecuted && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-xs text-green-700">
+          Otomatik atama tamamlandı.
+        </div>
+      )}
 
-      {/* Başarı mesajı */}
+      {/* Onay durumu banner */}
+      {teacher.hasFinalized && (
+        <div className={`mb-4 p-3 rounded-xl border text-sm ${
+          isDone
+            ? "bg-green-50 border-green-200 text-green-700"
+            : "bg-blue-50 border-blue-200 text-blue-700"
+        }`}>
+          {isDone
+            ? "Tüm hocalar onayladı. Admin otomatik atamayı başlatacak."
+            : "Onayınız alındı. Admin tüm hocalar onayladıktan sonra atamayı başlatacak."}
+          {" "}
+          <span className="font-medium">Seçimleri aşağıdan güncelleyebilirsiniz.</span>
+        </div>
+      )}
+
+      {/* Güncelleme mesajı */}
       {resultMsg && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm flex items-center justify-between">
           <span>{resultMsg}</span>
@@ -157,22 +152,39 @@ const StudentApprovalPage = () => {
         </div>
       )}
 
+      {/* Kontenjan bilgisi */}
+      <div className="flex flex-wrap gap-2 mb-5">
+        {[
+          { label: "Toplam",       value: allStudents.length },
+          { label: "Seçili",       value: selectedIds.size, highlight: true },
+          { label: "Kalan Limit",  value: selectionLimit - selectedIds.size, red: selectionLimit - selectedIds.size === 0 },
+          { label: "Maks",         value: teacher.maxQuota },
+        ].map(({ label, value, highlight, red }) => (
+          <div key={label} className="bg-white border rounded-lg px-4 py-2.5 text-sm">
+            <span className="text-gray-400">{label}: </span>
+            <span className={`font-semibold ${highlight ? "text-blue-600" : red ? "text-red-500" : ""}`}>
+              {value}
+            </span>
+          </div>
+        ))}
+      </div>
+
       {/* Kontenjan dolu uyarısı */}
-      {remainingQuota === 0 && students.length > 0 && (
+      {selectionLimit === 0 && allStudents.length > 0 && (
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
           Kontenjanınız dolmuş. Tüm öğrenciler otomatik atama bekleyecek.
         </div>
       )}
 
-      {/* Boş kuyruk */}
-      {students.length === 0 && (
+      {/* Boş liste */}
+      {allStudents.length === 0 && (
         <div className="text-gray-400 text-sm py-10 text-center bg-white border rounded-lg">
           1. tercih listenizdeki öğrenci yok.
         </div>
       )}
 
       {/* Öğrenci tablosu */}
-      {students.length > 0 && (
+      {allStudents.length > 0 && (
         <>
           <div className="bg-white border rounded-lg overflow-x-auto mb-4">
            <div className="min-w-max">
@@ -185,9 +197,9 @@ const StudentApprovalPage = () => {
               <div>Tercih Sırası</div>
             </div>
 
-            {students.map((s) => {
+            {allStudents.map((s) => {
               const isSelected = selectedIds.has(s._id);
-              const isDisabled = !isSelected && selectedIds.size >= remainingQuota;
+              const isDisabled = !isSelected && selectedIds.size >= selectionLimit;
 
               return (
                 <div
@@ -224,15 +236,18 @@ const StudentApprovalPage = () => {
            </div>
           </div>
 
-          {/* Onay butonu veya inline confirm */}
+          {/* Onay / güncelleme bölümü */}
           {showConfirm ? (
             <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl space-y-3">
               <p className="text-sm text-gray-700">
                 <span className="font-semibold">{selectedIds.size} öğrenci</span> onaylanacak.
-                {students.length - selectedIds.size > 0 && (
-                  <> <span className="font-semibold">{students.length - selectedIds.size} öğrenci</span> onaylanmayacak — tüm hocalar tamamladığında otomatik atanacak.</>
+                {allStudents.length - selectedIds.size > 0 && (
+                  <> <span className="font-semibold">{allStudents.length - selectedIds.size} öğrenci</span> onaylanmayacak — atama bekleyecek.</>
                 )}
               </p>
+              {teacher.hasFinalized && (
+                <p className="text-xs text-orange-600">Önceki seçimler sıfırlanıp yeniden uygulanacak.</p>
+              )}
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleFinalize}
@@ -258,10 +273,12 @@ const StudentApprovalPage = () => {
                 className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium
                 hover:bg-black transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Onayla ve Tamamla
+                {teacher.hasFinalized ? "Seçimleri Güncelle" : "Onayla ve Tamamla"}
               </button>
               <p className="text-xs text-gray-400">
-                Onaylanmayan öğrenciler, tüm hocalar tamamladığında otomatik atanır.
+                {teacher.hasFinalized
+                  ? "Admin atamayı başlatana kadar değiştirebilirsiniz."
+                  : "Onaylanmayan öğrenciler, admin atamayı başlattığında otomatik atanır."}
               </p>
             </div>
           )}

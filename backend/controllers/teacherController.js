@@ -59,8 +59,6 @@ export const teacherLogin = async (req, res) => {
 export const getMyStudents = async (req, res) => {
   try {
     const teacherId = req.teacher._id;
-
-    // Güncel hoca verisini çek (hasFinalized dahil)
     const teacher = await Teacher.findById(teacherId);
 
     const [totalTeachers, finalizedCount] = await Promise.all([
@@ -68,17 +66,19 @@ export const getMyStudents = async (req, res) => {
       Teacher.countDocuments({ hasFinalized: true }),
     ]);
 
-    // Zaten onaylamışsa boş liste döndür
-    if (teacher.hasFinalized) {
-      return res.json({ students: [], teacher, finalizedCount, totalTeachers });
-    }
-
-    const students = await Student.find({
+    // Onaylanmış (bu hocaya atanmış, 1. tercihi bu hoca olan) öğrenciler
+    const approvedStudents = await Student.find({
+      assignedTeacher: teacherId,
       "preferences.0": teacherId,
-      status: { $ne: "assigned" },
     }).populate("preferences");
 
-    res.json({ students, teacher, finalizedCount, totalTeachers });
+    // Bekleyen (henüz atanmamış, 1. tercihi bu hoca olan) öğrenciler
+    const waitingStudents = await Student.find({
+      "preferences.0": teacherId,
+      status: "unassigned",
+    }).populate("preferences");
+
+    res.json({ students: waitingStudents, approvedStudents, teacher, finalizedCount, totalTeachers });
   } catch (error) {
     res.status(500).json({ message: "Öğrenciler alınamadı" });
   }
@@ -89,11 +89,24 @@ export const finalizeApproval = async (req, res) => {
     const teacherId = req.teacher._id;
     const { approvedStudentIds } = req.body;
 
-    const teacher = await Teacher.findById(teacherId);
+    let teacher = await Teacher.findById(teacherId);
 
-    // Çift onay koruması
+    // Güncelleme: önceki onayları geri al (re-finalizasyon desteği)
     if (teacher.hasFinalized) {
-      return res.status(400).json({ message: "Zaten onayladınız." });
+      const previouslyApproved = await Student.find({
+        assignedTeacher: teacherId,
+        "preferences.0": teacherId,
+      });
+      for (const student of previouslyApproved) {
+        student.assignedTeacher = null;
+        student.status = "unassigned";
+        await student.save();
+      }
+      await Teacher.findByIdAndUpdate(teacherId, {
+        $inc: { currentCount: -previouslyApproved.length },
+        hasFinalized: false,
+      });
+      teacher = await Teacher.findById(teacherId);
     }
 
     // Kontenjan kontrolü
@@ -103,10 +116,10 @@ export const finalizeApproval = async (req, res) => {
       });
     }
 
-    // 1. Onaylanan öğrencileri ata
+    // Onaylanan öğrencileri ata
     const waitingStudents = await Student.find({
       "preferences.0": teacherId,
-      status: { $ne: "assigned" },
+      status: "unassigned",
     });
 
     for (const student of waitingStudents) {
@@ -118,27 +131,20 @@ export const finalizeApproval = async (req, res) => {
           $inc: { currentCount: 1 },
         });
       }
-      // Onaylanmayanlar 'unassigned' kalır — cascade bekliyor
     }
 
-    // 2. Hocanın onay durumunu işaretle
+    // Hocanın onay durumunu işaretle
     await Teacher.findByIdAndUpdate(teacherId, { hasFinalized: true });
 
-    // 3. Tüm hocalar onayladı mı?
     const pendingCount = await Teacher.countDocuments({ hasFinalized: false });
-    const allFinalized = pendingCount === 0;
     const totalTeachers = await Teacher.countDocuments();
     const finalizedCount = totalTeachers - pendingCount;
+    const allFinalized = pendingCount === 0;
 
-    // 4. Hepsi onayladıysa cascade çalıştır
-    if (allFinalized) {
-      await runCascade();
-    }
+    // Otomatik cascade kaldırıldı — admin "Manuel Başlat" ile tetikler
 
     res.json({
-      message: allFinalized
-        ? "Tüm hocalar onayladı. Otomatik atama gerçekleştirildi."
-        : `Onayınız alındı. ${finalizedCount}/${totalTeachers} hoca tamamladı.`,
+      message: `Onayınız alındı. ${finalizedCount}/${totalTeachers} hoca tamamladı.`,
       allFinalized,
       finalizedCount,
       totalTeachers,

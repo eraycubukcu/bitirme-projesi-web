@@ -55,7 +55,13 @@ export const getDashboard = async (req, res) => {
         (start || end)
           ? (!start || now >= start) && (!end || now <= end)
           : false;
-      formStatus = { isOpen, startDate: form.startDate, endDate: form.endDate };
+      formStatus = {
+        isOpen,
+        startDate: form.startDate,
+        endDate: form.endDate,
+        cascadeDate: form.cascadeDate || null,
+        cascadeExecuted: form.cascadeExecuted || false,
+      };
     }
 
     const finalizedCount = teachers.filter((t) => t.hasFinalized).length;
@@ -77,10 +83,13 @@ export const getDashboard = async (req, res) => {
   }
 };
 
-// Admin manual cascade — bazı hocalar onaylayamazsa admin devreye girer
+// Admin manual cascade
 export const triggerCascade = async (req, res) => {
   try {
     await runCascade();
+
+    // Cascade çalıştı olarak işaretle
+    await FormConfig.findOneAndUpdate({}, { cascadeExecuted: true });
 
     const total = await Student.countDocuments();
     const assigned = await Student.countDocuments({ status: "assigned" });

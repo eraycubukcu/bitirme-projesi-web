@@ -55,6 +55,7 @@ const FormSettingsPage = () => {
   const [newLabel, setNewLabel] = useState("");
   const [newRequired, setNewRequired] = useState(false);
   const [newFieldType, setNewFieldType] = useState("text");
+  const [cascadeInput, setCascadeInput] = useState("");
 
   const fetchForm = async () => {
     try {
@@ -63,6 +64,7 @@ const FormSettingsPage = () => {
       setForm(data);
       setStartInput(toLocalInput(data.startDate || ""));
       setEndInput(toLocalInput(data.endDate || ""));
+      setCascadeInput(toLocalInput(data.cascadeDate || ""));
       setIsDirty(false);
     } catch (err: any) {
       if (err.response?.status !== 404) {
@@ -129,6 +131,7 @@ const FormSettingsPage = () => {
         startDate: toUTC(startInput),
         endDate: toUTC(endInput),
         uniqueField: form.uniqueField || null,
+        cascadeDate: toUTC(cascadeInput),
       });
       await fetchForm();
       setSaveResult("success");
@@ -150,6 +153,7 @@ const FormSettingsPage = () => {
         startDate: null,
         endDate: null,
         uniqueField: form.uniqueField || null,
+        cascadeDate: toUTC(cascadeInput),
       });
       setStartInput("");
       setEndInput("");
@@ -445,6 +449,53 @@ const FormSettingsPage = () => {
           )}
         </div>
       )}
+
+      {/* ── Otomatik Atama Tarihi ────────────────────────────────── */}
+      <div className="border rounded-xl p-4 mb-6 bg-gray-50">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">Otomatik Atama Tarihi</h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Bu tarih geldiğinde bekleyen öğrenciler otomatik olarak atanır.
+            </p>
+          </div>
+          {cascadeInput && (
+            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+              form.cascadeExecuted
+                ? "bg-green-100 text-green-700"
+                : "bg-orange-100 text-orange-700"
+            }`}>
+              {form.cascadeExecuted ? "Tamamlandı" : "Bekliyor"}
+            </span>
+          )}
+        </div>
+
+        <input
+          type="datetime-local"
+          value={cascadeInput}
+          onChange={(e) => { setCascadeInput(e.target.value); markDirty(); }}
+          className="w-full border rounded-lg p-2 text-sm bg-white
+          focus:outline-none focus:ring-1 focus:ring-gray-900"
+        />
+
+        {cascadeInput ? (
+          <div className="mt-2 flex items-center justify-between">
+            <p className="text-xs text-gray-400">
+              {new Date(cascadeInput).toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" })}
+            </p>
+            <button
+              onClick={() => { setCascadeInput(""); markDirty(); }}
+              className="text-xs text-red-400 hover:text-red-600 transition"
+            >
+              Tarihi temizle
+            </button>
+          </div>
+        ) : (
+          <p className="text-xs text-gray-400 mt-1">
+            Tarih girilmezse otomatik atama çalışmaz.
+          </p>
+        )}
+      </div>
 
       {/* ── Alan Ekle Modal ──────────────────────────────────────── */}
       {showAddModal && (
