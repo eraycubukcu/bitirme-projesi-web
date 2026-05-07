@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
 import type { Field, FormConfig } from "../../types";
 import { useTheme } from "../../ThemeContext";
@@ -10,6 +10,9 @@ function FormPage() {
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragNode = useRef<HTMLDivElement | null>(null);
   const { theme, toggle } = useTheme();
 
   useEffect(() => { document.title = "Bitirme Projesi Danışman Seçimi"; }, []);
@@ -73,6 +76,39 @@ function FormPage() {
     const updated = [...teachers];
     [updated[index + 1], updated[index]] = [updated[index], updated[index + 1]];
     setTeachers(updated);
+  };
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    dragNode.current = e.currentTarget;
+    setDragIndex(index);
+    // sürükleme görselini küçük gecikmeyle uygula
+    setTimeout(() => setDragIndex(index), 0);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === dropIndex) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    const updated = [...teachers];
+    const [dragged] = updated.splice(dragIndex, 1);
+    updated.splice(dropIndex, 0, dragged);
+    setTeachers(updated);
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
   };
 
   const validateFields = (): string => {
@@ -250,19 +286,41 @@ function FormPage() {
         </div>
 
         <div className="mb-8">
-          <h2 className="text-sm font-medium text-gray-700 dark:text-white mb-3">
+          <h2 className="text-sm font-medium text-gray-700 dark:text-white mb-1">
             Tercih Sıralaması
           </h2>
+          <p className="text-xs text-gray-400 dark:text-zinc-500 mb-3">
+            Hocaları sürükleyerek veya ok tuşlarıyla istediğiniz sıraya göre düzenleyebilirsiniz.
+          </p>
 
           <div className="space-y-2">
             {teachers.map((teacher, index) => (
               <div
                 key={teacher._id}
-                className="flex justify-between border dark:border-zinc-800 p-2 rounded-md"
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                className={[
+                  "flex justify-between border rounded-md p-2 transition-all select-none",
+                  dragIndex === index
+                    ? "opacity-40 scale-[0.98] border-dashed dark:border-zinc-600 border-gray-300"
+                    : dragOverIndex === index
+                    ? "border-gray-500 dark:border-zinc-400 bg-gray-50 dark:bg-zinc-900"
+                    : "border-gray-200 dark:border-zinc-800",
+                ].join(" ")}
               >
-                <div className="flex gap-3">
-                  <span className="text-gray-400 mt-0.5">{index + 1}</span>
-                  <div>
+                {/* Sürükleme tutacağı + numara + isim */}
+                <div className="flex gap-2 items-start min-w-0">
+                  <span
+                    className="mt-1 text-gray-300 dark:text-zinc-600 cursor-grab active:cursor-grabbing text-base leading-none shrink-0"
+                    title="Sürükle"
+                  >
+                    ⠿
+                  </span>
+                  <span className="text-gray-400 mt-0.5 shrink-0">{index + 1}</span>
+                  <div className="min-w-0">
                     <p className="text-gray-800 dark:text-white text-sm">{teacher.name}</p>
                     {teacher.bio && (
                       <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5 leading-relaxed">
@@ -272,7 +330,8 @@ function FormPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-1">
+                {/* Ok butonları */}
+                <div className="flex gap-1 shrink-0 ml-2">
                   <button
                     onClick={() => moveUp(index)}
                     disabled={index === 0}
