@@ -243,7 +243,7 @@ const StudentApprovalPage = () => {
                     checked={isSelected}
                     disabled={isDisabled}
                     readOnly
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); if (!isDisabled) toggleSelect(s._id); }}
                     className="cursor-pointer w-4 h-4"
                   />
                   {columns.map((col: any) => (
@@ -253,7 +253,7 @@ const StudentApprovalPage = () => {
                   ))}
                   <div className="text-xs text-gray-400 space-y-0.5">
                     {s.preferences.map((p: any, i: number) => (
-                      <div key={i}>{i + 1}. {p.name}</div>
+                      <div key={i}>{i + 1}. {i === 0 ? p.name : "***"}</div>
                     ))}
                   </div>
                 </div>
