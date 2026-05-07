@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import api from "../../services/api";
+import { SkeletonBlock, SkeletonLine, SkeletonRow } from "../components/Skeleton";
 
 interface PageData {
   students: any[];
@@ -40,7 +42,32 @@ const StudentApprovalPage = () => {
   useEffect(() => { fetchData(); }, []);
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
-  if (!data || !formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
+
+  if (!data || !formConfig) return (
+    <div className="p-4 sm:p-6 w-full space-y-5">
+      <div className="space-y-2">
+        <SkeletonLine className="w-48 h-6" />
+        <SkeletonLine className="w-64 h-3" />
+      </div>
+      <SkeletonBlock className="w-full h-12 rounded-xl" />
+      <div className="border dark:border-zinc-800 rounded-xl overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b dark:border-zinc-800">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <th key={i} className="px-4 py-3 text-left">
+                  <SkeletonLine className="w-16 h-3" />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} cols={4} />)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   const { teacher, finalizedCount, totalTeachers } = data;
   const columns: any[] = formConfig.textFields || [];
@@ -75,9 +102,12 @@ const StudentApprovalPage = () => {
         approvedStudentIds: Array.from(selectedIds),
       });
       setResultMsg(res.data.message);
+      toast.success(res.data.message || "Onay listesi kaydedildi.");
       await fetchData();
     } catch (err: any) {
-      setFinalizeError(err.response?.data?.message || "Hata oluştu.");
+      const msg = err.response?.data?.message || "Hata oluştu.";
+      setFinalizeError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import api from "../../services/api";
+import { SkeletonBlock, SkeletonLine } from "../components/Skeleton";
 
 const generateKey = (label: string) =>
   label
@@ -136,8 +138,10 @@ const FormSettingsPage = () => {
       });
       await fetchForm();
       setSaveResult("success");
+      toast.success("Form ayarları kaydedildi.");
     } catch {
       setSaveResult("error");
+      toast.error("Kaydedilemedi. Lütfen tekrar deneyin.");
     } finally {
       setSaving(false);
     }
@@ -168,7 +172,32 @@ const FormSettingsPage = () => {
   };
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
-  if (!loaded)    return <div className="p-6 text-gray-400">Yükleniyor...</div>;
+
+  if (!loaded) return (
+    <div className="max-w-2xl mx-auto p-4 sm:p-6 space-y-6">
+      <div className="space-y-2">
+        <SkeletonLine className="w-40 h-6" />
+        <SkeletonLine className="w-56 h-3" />
+      </div>
+      <div className="border dark:border-zinc-800 rounded-xl p-5 space-y-4">
+        <SkeletonLine className="w-32 h-4" />
+        <SkeletonBlock className="w-full h-20 rounded-lg" />
+        <div className="grid grid-cols-2 gap-4">
+          <SkeletonBlock className="h-10 rounded-lg" />
+          <SkeletonBlock className="h-10 rounded-lg" />
+        </div>
+      </div>
+      <div className="border dark:border-zinc-800 rounded-xl p-5 space-y-3">
+        <SkeletonLine className="w-32 h-4" />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex items-center justify-between border dark:border-zinc-800 rounded-lg p-3">
+            <SkeletonLine className="w-32 h-3" />
+            <SkeletonBlock className="w-16 h-7 rounded-lg" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const dtCls = "w-full border dark:border-zinc-800 rounded-lg p-2 text-sm " +
     "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white " +

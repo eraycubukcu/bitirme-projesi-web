@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import api from "../../services/api";
+import { SkeletonBlock, SkeletonLine, SkeletonRow } from "../components/Skeleton";
 
 const StudentsPage = () => {
   const [students, setStudents] = useState<any[]>([]);
@@ -115,7 +116,39 @@ const StudentsPage = () => {
   };
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
-  if (!formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
+
+  if (!formConfig) return (
+    <div className="p-6 w-full space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <SkeletonLine className="w-40 h-6" />
+          <SkeletonLine className="w-24 h-3" />
+        </div>
+        <SkeletonBlock className="w-28 h-9 rounded-lg" />
+      </div>
+      <div className="flex gap-3">
+        <SkeletonBlock className="flex-1 h-9 rounded-lg" />
+        <SkeletonBlock className="w-40 h-9 rounded-lg" />
+        <SkeletonBlock className="w-40 h-9 rounded-lg" />
+      </div>
+      <div className="border dark:border-zinc-800 rounded-xl overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b dark:border-zinc-800">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <th key={i} className="px-4 py-3 text-left">
+                  <SkeletonLine className="w-20 h-3" />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonRow key={i} cols={5} />)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
   const sortIcon = (key: string) => {
     if (sortKey !== key) return <span className="text-gray-300 dark:text-zinc-700 ml-1">↕</span>;

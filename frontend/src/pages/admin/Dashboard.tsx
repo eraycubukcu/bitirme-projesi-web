@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import api from "../../services/api";
+import { SkeletonBlock, SkeletonLine, SkeletonStatCard } from "../components/Skeleton";
 
 interface CascadeResult {
   message: string;
@@ -39,16 +41,39 @@ const Dashboard = () => {
     try {
       const res = await api.post("/admin/cascade");
       setCascadeResult(res.data);
+      toast.success(`Atama tamamlandı — ${res.data.assignedCount} öğrenci atandı.`);
       await fetchData();
     } catch {
-      setCascadeError("Otomatik atama sırasında hata oluştu.");
+      toast.error("Otomatik atama sırasında hata oluştu.");
     } finally {
       setCascading(false);
     }
   };
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
-  if (!data) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
+
+  if (!data) return (
+    <div className="p-4 sm:p-6 w-full max-w-3xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <SkeletonLine className="w-32 h-6" />
+          <SkeletonLine className="w-48 h-3" />
+        </div>
+        <SkeletonBlock className="w-20 h-8 rounded-lg" />
+      </div>
+      <SkeletonBlock className="w-full h-14 rounded-xl" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {Array.from({ length: 4 }).map((_, i) => <SkeletonStatCard key={i} />)}
+      </div>
+      <SkeletonBlock className="w-full h-20 rounded-xl" />
+      <div className="border dark:border-zinc-800 rounded-xl p-5 space-y-3">
+        <SkeletonLine className="w-40 h-4" />
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SkeletonBlock key={i} className="w-full h-9 rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
 
   const {
     studentCount,

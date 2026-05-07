@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import { toast } from "sonner";
 import api from "../../services/api";
+import { SkeletonBlock, SkeletonLine, SkeletonRow } from "../components/Skeleton";
 
 const AssignedStudentsPage = () => {
   const [students, setStudents] = useState<any[]>([]);
@@ -38,8 +40,9 @@ const AssignedStudentsPage = () => {
     try {
       await api.post("/admin/assigned", { studentId, teacherId });
       await fetchAll();
+      toast.success("Öğrenci atandı.");
     } catch (err: any) {
-      setAssignError(err.response?.data?.message || "Atama başarısız.");
+      toast.error(err.response?.data?.message || "Atama başarısız.");
     } finally {
       setAssigning(null);
     }
@@ -68,7 +71,28 @@ const AssignedStudentsPage = () => {
   };
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;
-  if (!formConfig) return <div className="p-6 text-gray-400">Yükleniyor...</div>;
+
+  if (!formConfig) return (
+    <div className="p-4 sm:p-6 w-full space-y-6">
+      <div className="space-y-2">
+        <SkeletonLine className="w-40 h-6" />
+        <SkeletonLine className="w-56 h-3" />
+      </div>
+      {Array.from({ length: 2 }).map((_, gi) => (
+        <div key={gi} className="border dark:border-zinc-800 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b dark:border-zinc-800 flex justify-between">
+            <SkeletonLine className="w-36 h-4" />
+            <SkeletonBlock className="w-24 h-7 rounded-lg" />
+          </div>
+          <table className="w-full">
+            <tbody>
+              {Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} cols={4} />)}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
+  );
 
   const columns: any[] = formConfig.textFields || [];
   const assigned = students.filter((s) => s.assignedTeacher);

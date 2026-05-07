@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import api from "../../services/api";
+import { SkeletonTeacherCard } from "../components/Skeleton";
 
 const TeachersPage = () => {
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -14,6 +16,7 @@ const TeachersPage = () => {
   const [maxQuota, setMaxQuota] = useState(0);
 
   const [loading, setLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const [modalError, setModalError] = useState("");
   const [fetchError, setFetchError] = useState("");
 
@@ -23,6 +26,8 @@ const TeachersPage = () => {
       setTeachers(res.data);
     } catch {
       setFetchError("Danışmanlar yüklenemedi.");
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -78,6 +83,7 @@ const TeachersPage = () => {
       }
       await fetchTeachers();
       setShowModal(false);
+      toast.success(editTeacher ? "Danışman güncellendi." : "Danışman eklendi.");
     } catch (err: any) {
       setModalError(err.response?.data?.message || "İşlem başarısız.");
     } finally {
@@ -90,10 +96,10 @@ const TeachersPage = () => {
       await api.delete(`/teachers/${id}`);
       setConfirmDeleteId(null);
       await fetchTeachers();
+      toast.success("Danışman silindi.");
     } catch (err: any) {
       setConfirmDeleteId(null);
-      setFetchError(err.response?.data?.message || "Silinemedi.");
-      setTimeout(() => setFetchError(""), 4000);
+      toast.error(err.response?.data?.message || "Silinemedi.");
     }
   };
 
@@ -136,7 +142,9 @@ const TeachersPage = () => {
 
       {/* ── Liste ──────────────────────────────────────────────── */}
       <div className="space-y-3">
-        {teachers.length === 0 && (
+        {isFetching && Array.from({ length: 3 }).map((_, i) => <SkeletonTeacherCard key={i} />)}
+
+        {!isFetching && teachers.length === 0 && (
           <div className="text-center py-16 text-sm text-gray-300 dark:text-zinc-700 border dark:border-zinc-800 border-dashed rounded-xl">
             Henüz danışman eklenmedi.
           </div>

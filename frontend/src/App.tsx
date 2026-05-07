@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
 import FormPage from "./pages/public/FormPage";
 import LoginPage from "./pages/admin/LoginPage";
 import AdminLayout from "./pages/layouts/AdminLayout";
@@ -14,6 +15,8 @@ import ProfilePage from "./pages/teacher/ProfilePage";
 
 function App() {
   return (
+    <>
+    <Toaster position="top-right" richColors closeButton />
     <Routes>
       <Route path="/" element={<FormPage />} />
 
@@ -50,6 +53,7 @@ function App() {
         <Route path="profile" element={<ProfilePage />} />
       </Route>
     </Routes>
+    </>
   );
 }
 

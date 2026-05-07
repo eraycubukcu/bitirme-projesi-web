@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import api from "../../services/api";
+import { SkeletonBlock, SkeletonLine } from "../components/Skeleton";
 
 function ProfilePage() {
   const [bio, setBio] = useState("");
@@ -34,9 +36,12 @@ function ProfilePage() {
       await api.put("/teachers/profile", { bio });
       setOriginalBio(bio);
       setSuccess(true);
+      toast.success("Profil güncellendi.");
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Kaydedilemedi.");
+      const msg = err.response?.data?.message || "Kaydedilemedi.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -46,8 +51,17 @@ function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="p-6 flex items-center justify-center min-h-[200px]">
-        <p className="text-sm text-gray-400 animate-pulse">Yükleniyor...</p>
+      <div className="p-6 max-w-2xl space-y-4">
+        <SkeletonLine className="w-24 h-6" />
+        <SkeletonLine className="w-80 h-3" />
+        <div className="border dark:border-zinc-800 rounded-xl p-5 space-y-3">
+          <SkeletonLine className="w-48 h-3" />
+          <SkeletonBlock className="w-full h-36 rounded-lg" />
+          <div className="flex justify-between">
+            <SkeletonLine className="w-12 h-3" />
+          </div>
+          <SkeletonBlock className="w-20 h-9 rounded-lg" />
+        </div>
       </div>
     );
   }

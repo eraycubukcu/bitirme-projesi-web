@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
 import type { Field, FormConfig } from "../../types";
 import { useTheme } from "../../ThemeContext";
+import { SkeletonField, SkeletonLine, SkeletonPreferenceItem } from "../components/Skeleton";
 
 function FormPage() {
   const [form, setForm] = useState<FormConfig | null>(null);
@@ -44,12 +45,25 @@ function FormPage() {
 
   if (!form) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4 py-10">
         <ThemeBtn />
         {error ? (
           <p className="text-red-500 text-sm">{error}</p>
         ) : (
-          <p className="text-gray-500 text-sm animate-pulse">Yükleniyor...</p>
+          <div className="w-full max-w-md bg-white dark:bg-zinc-950 rounded-xl border dark:border-zinc-800 shadow-sm p-5 sm:p-8 space-y-6">
+            <div className="space-y-2">
+              <SkeletonLine className="w-2/5 h-5" />
+              <SkeletonLine className="w-3/5 h-3" />
+            </div>
+            <div className="space-y-5">
+              {Array.from({ length: 4 }).map((_, i) => <SkeletonField key={i} />)}
+            </div>
+            <div className="space-y-2">
+              <SkeletonLine className="w-1/3 h-4" />
+              {Array.from({ length: 4 }).map((_, i) => <SkeletonPreferenceItem key={i} />)}
+            </div>
+            <SkeletonLine className="w-full h-11 rounded-lg" />
+          </div>
         )}
       </div>
     );
