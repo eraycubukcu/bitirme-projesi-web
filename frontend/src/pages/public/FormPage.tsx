@@ -267,7 +267,8 @@ function FormPage() {
                 type={field.fieldType === "email" ? "email" : field.fieldType === "phone" ? "tel" : "text"}
                 inputMode={
                   field.key === "gpa" ? "decimal" :
-                  field.fieldType === "phone" || field.fieldType === "number" ? "numeric" :
+                  field.fieldType === "phone" ? "tel" :
+                  field.fieldType === "number" ? "numeric" :
                   undefined
                 }
                 value={formData[field.key] || ""}

@@ -256,16 +256,14 @@ const StudentsPage = () => {
           >
             <option value="date_desc">Tarih (Yeni → Eski)</option>
             <option value="date_asc">Tarih (Eski → Yeni)</option>
-            {columns.map((col: any) => (
-              <>
-                <option key={`${col.key}_asc`} value={`${col.key}_dir_asc`}>
-                  {col.label} (A → Z)
-                </option>
-                <option key={`${col.key}_desc`} value={`${col.key}_dir_desc`}>
-                  {col.label} (Z → A)
-                </option>
-              </>
-            ))}
+            {columns.flatMap((col: any) => [
+              <option key={`${col.key}_asc`} value={`${col.key}_dir_asc`}>
+                {col.label} (A → Z)
+              </option>,
+              <option key={`${col.key}_desc`} value={`${col.key}_dir_desc`}>
+                {col.label} (Z → A)
+              </option>,
+            ])}
             <option value={`teacher_dir_asc`}>Danışman (A → Z)</option>
             <option value={`teacher_dir_desc`}>Danışman (Z → A)</option>
           </select>
