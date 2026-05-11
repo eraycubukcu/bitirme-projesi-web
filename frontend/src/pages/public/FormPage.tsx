@@ -133,9 +133,16 @@ function FormPage() {
         if (field.fieldType === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
           return `"${field.label}" geçerli bir e-posta adresi olmalıdır.`;
         if (field.fieldType === "phone") {
-          const digits = value.replace(/[\s\-().+]/g, "");
-          if (!/^\d+$/.test(digits) || digits.length < 7)
-            return `"${field.label}" geçerli bir telefon numarası olmalıdır.`;
+          const digits = value.replace(/\D/g, "");
+          if (value.trim().startsWith("0")) {
+            if (digits.length !== 11 || !digits.startsWith("05"))
+              return `"${field.label}" 05XX XXX XX XX formatında 11 haneli olmalıdır.`;
+          } else if (value.trim().startsWith("+")) {
+            if (digits.length < 7 || digits.length > 15)
+              return `"${field.label}" geçerli bir uluslararası numara giriniz (+XX ile başlayan).`;
+          } else {
+            return `"${field.label}" 05XX... veya +ülkekodu... formatında girilmelidir.`;
+          }
         }
         if (field.key === "gpa") {
           if (!/^\d\.\d{2}$/.test(value))
@@ -281,7 +288,16 @@ function FormPage() {
                     }
                     e.target.value = val;
                   } else if (field.fieldType === "phone") {
-                    val = val.replace(/[^\d\s\-().+]/g, "");
+                    const stripped = val.replace(/[^\d\s\-+]/g, "");
+                    if (stripped.startsWith("0")) {
+                      const raw = stripped.replace(/\D/g, "").slice(0, 11);
+                      if (raw.length <= 4) val = raw;
+                      else if (raw.length <= 7) val = raw.slice(0, 4) + " " + raw.slice(4);
+                      else if (raw.length <= 9) val = raw.slice(0, 4) + " " + raw.slice(4, 7) + " " + raw.slice(7);
+                      else val = raw.slice(0, 4) + " " + raw.slice(4, 7) + " " + raw.slice(7, 9) + " " + raw.slice(9);
+                    } else {
+                      val = stripped;
+                    }
                   } else if (field.fieldType === "number") {
                     val = val.replace(/\D/g, "");
                   }
@@ -291,7 +307,7 @@ function FormPage() {
                 placeholder={
                   field.key === "gpa" ? "örn: 2.40" :
                   field.fieldType === "email" ? "ornek@mail.com" :
-                  field.fieldType === "phone" ? "05xx xxx xx xx" :
+                  field.fieldType === "phone" ? "0532 123 45 67 veya +49..." :
                   field.fieldType === "number" ? "Yalnızca rakam" :
                   ""
                 }
