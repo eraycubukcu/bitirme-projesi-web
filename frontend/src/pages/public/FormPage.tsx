@@ -296,6 +296,8 @@ function FormPage() {
                       else if (raw.length <= 9) val = raw.slice(0, 4) + " " + raw.slice(4, 7) + " " + raw.slice(7);
                       else val = raw.slice(0, 4) + " " + raw.slice(4, 7) + " " + raw.slice(7, 9) + " " + raw.slice(9);
                     } else {
+                      const digits = stripped.replace(/\D/g, "");
+                      if (digits.length > 15) return;
                       val = stripped;
                     }
                   } else if (field.fieldType === "number") {
