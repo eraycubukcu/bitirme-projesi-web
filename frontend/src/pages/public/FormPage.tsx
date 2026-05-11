@@ -145,11 +145,11 @@ function FormPage() {
           }
         }
         if (field.key === "gpa") {
-          if (!/^\d\.\d{2}$/.test(value))
-            return `"${field.label}" X.XX formatında girilmelidir (örn: 2.40).`;
+          if (!/^\d(\.\d{1,2})?$/.test(value))
+            return `"${field.label}" geçerli bir not ortalaması giriniz (örn: 3.5 veya 3.50).`;
           const num = parseFloat(value);
           if (num < 0 || num > 4)
-            return `"${field.label}" 0.00 ile 4.00 arasında olmalıdır (örn: 2.40).`;
+            return `"${field.label}" 0 ile 4 arasında olmalıdır.`;
         } else if (field.fieldType === "number" && !/^\d+$/.test(value)) {
           return `"${field.label}" yalnızca rakam içermelidir.`;
         }
