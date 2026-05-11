@@ -239,7 +239,7 @@ const StudentsPage = () => {
           </select>
 
           <select
-            value={sortKey === "date_desc" || sortKey === "date_asc" ? sortKey : `${sortKey}_${sortDir}`}
+            value={sortKey === "date_desc" || sortKey === "date_asc" ? sortKey : `${sortKey}_dir_${sortDir}`}
             onChange={(e) => {
               const val = e.target.value;
               if (val === "date_desc" || val === "date_asc") {
