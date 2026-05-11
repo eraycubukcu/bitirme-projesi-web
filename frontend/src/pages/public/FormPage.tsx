@@ -226,6 +226,10 @@ function FormPage() {
       <ThemeBtn />
       <div className="w-full max-w-md bg-white dark:bg-zinc-950 rounded-xl border dark:border-zinc-800 shadow-sm p-5 sm:p-8">
 
+        <div className="flex justify-center mb-6">
+          <img src="/kirmizi-logo.png" alt="Logo" className="h-16 object-contain" />
+        </div>
+
         <div className="mb-8">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             Danışman Seçimi
