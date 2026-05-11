@@ -29,6 +29,7 @@ const TeacherLayout = () => {
     <div className="flex flex-col h-full p-5">
       <div className="flex items-start justify-between mb-6">
         <div>
+          <Link to="/teacher/students"><img src="/kirmizi-logo-yatay.png" alt="Logo" className="h-10 object-contain mb-5" /></Link>
           <h1 className="text-lg font-semibold dark:text-white">Hoca Paneli</h1>
           <p className="text-xs text-gray-400">Danışman Sistemi</p>
         </div>
@@ -83,7 +84,7 @@ const TeacherLayout = () => {
           <span className="w-5 h-0.5 bg-gray-700 dark:bg-white rounded" />
           <span className="w-5 h-0.5 bg-gray-700 dark:bg-white rounded" />
         </button>
-        <span className="ml-3 font-semibold text-gray-900 dark:text-white">Hoca Paneli</span>
+        <Link to="/teacher/students"><img src="/kirmizi-logo-yatay.png" alt="Logo" className="ml-3 h-7 object-contain" /></Link>
         <div className="ml-auto">
           <ThemeBtn />
         </div>
