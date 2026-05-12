@@ -14,6 +14,7 @@ import FormSettingsPage from "./pages/admin/FormSettingsPage";
 import AssignedStudentsPage from "./pages/admin/AssignedStudentsPage";
 import StudentApprovalPage from "./pages/teacher/StudentApprovalPage";
 import ProfilePage from "./pages/teacher/ProfilePage";
+import NotFoundPage from "./pages/NotFoundPage";
 import api from "./services/api";
 
 function App() {
@@ -75,6 +76,8 @@ function App() {
           <Route path="students" element={<StudentApprovalPage />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );
