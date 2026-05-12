@@ -1,21 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../ThemeContext";
 
 export default function NotFoundPage() {
   const navigate = useNavigate();
-  const { theme, toggle } = useTheme();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4">
-      <button
-        onClick={toggle}
-        className="fixed top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-sm
-          bg-gray-900 text-white dark:bg-white dark:text-black z-50 transition-colors"
-        title={theme === "dark" ? "Aydınlık tema" : "Karanlık tema"}
-      >
-        ☾
-      </button>
-
       <div className="w-full max-w-sm text-center space-y-6">
         <div className="space-y-2">
           <p className="text-7xl font-bold text-gray-200 dark:text-zinc-800 select-none">

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
 import type { Field, FormConfig } from "../../types";
-import { useTheme } from "../../ThemeContext";
 import { SkeletonField, SkeletonLine, SkeletonPreferenceItem } from "../components/Skeleton";
 import AuthGate from "../../components/AuthGate";
 import { toast } from "sonner";
@@ -17,8 +16,6 @@ function FormPageContent() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragNode = useRef<HTMLDivElement | null>(null);
-  const { theme, toggle } = useTheme();
-
   useEffect(() => { document.title = "Bitirme Projesi Danışman Seçimi"; }, []);
 
   useEffect(() => {
@@ -57,21 +54,10 @@ function FormPageContent() {
     fetchData();
   }, []);
 
-  const ThemeBtn = () => (
-    <button
-      onClick={toggle}
-      className="fixed top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors
-        bg-gray-900 text-white dark:bg-white dark:text-black z-50"
-      title={theme === "dark" ? "Aydınlık tema" : "Karanlık tema"}
-    >
-      ☾
-    </button>
-  );
-
   if (!form) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4 py-10">
-        <ThemeBtn />
+
         {error ? (
           <p className="text-red-500 text-sm">{error}</p>
         ) : (
@@ -217,7 +203,7 @@ function FormPageContent() {
   if (submitted)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4">
-        <ThemeBtn />
+
         <div className="bg-white dark:bg-zinc-950 w-full max-w-lg rounded-2xl shadow-lg border dark:border-zinc-800 p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             Form Gönderildi!
@@ -233,7 +219,7 @@ function FormPageContent() {
   if (!isFormOpen)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-black dark:to-zinc-950 px-4">
-        <ThemeBtn />
+
         <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 shadow-xl rounded-2xl p-8 text-center max-w-md w-full">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">
             Form Kapalı
@@ -260,7 +246,6 @@ function FormPageContent() {
   // NORMAL FORM
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4 py-10">
-      <ThemeBtn />
       <div className="w-full max-w-md bg-white dark:bg-zinc-950 rounded-xl border dark:border-zinc-800 shadow-sm p-5 sm:p-8">
 
         <div className="flex justify-center mb-6">

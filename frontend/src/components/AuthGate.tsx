@@ -8,26 +8,11 @@ import {
 } from "@clerk/clerk-react";
 import { toast } from "sonner";
 import api from "../services/api";
-import { useTheme } from "../ThemeContext";
 
 const ALLOWED_DOMAIN = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN || "okul.edu.tr";
 
 interface AuthGateProps {
   children: React.ReactNode;
-}
-
-function ThemeBtn() {
-  const { theme, toggle } = useTheme();
-  return (
-    <button
-      onClick={toggle}
-      className="fixed top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-sm
-        bg-gray-900 text-white dark:bg-white dark:text-black z-50 transition-colors"
-      title={theme === "dark" ? "Aydınlık tema" : "Karanlık tema"}
-    >
-      ☾
-    </button>
-  );
 }
 
 function SyncGuard({ children }: AuthGateProps) {
@@ -44,7 +29,6 @@ function SyncGuard({ children }: AuthGateProps) {
           toast.error(err.response.data?.message || "Bu hesap kabul edilmiyor.");
           setStatus("forbidden");
         } else {
-          // Geçici hata — yeniden dene
           setStatus("forbidden");
         }
       });
@@ -53,7 +37,6 @@ function SyncGuard({ children }: AuthGateProps) {
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
-        <ThemeBtn />
         <div className="w-8 h-8 border-2 border-gray-300 dark:border-zinc-700 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
       </div>
     );
@@ -62,7 +45,6 @@ function SyncGuard({ children }: AuthGateProps) {
   if (status === "forbidden") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4">
-        <ThemeBtn />
         <div className="w-full max-w-sm bg-white dark:bg-zinc-950 rounded-xl border dark:border-zinc-800 shadow-sm p-8 text-center space-y-5">
           <img src="/kirmizi-logo.png" alt="Logo" className="h-14 object-contain mx-auto" />
           <div className="space-y-2">
@@ -101,7 +83,6 @@ export default function AuthGate({ children }: AuthGateProps) {
     <>
       <SignedOut>
         <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black px-4">
-          <ThemeBtn />
           <div className="w-full max-w-sm bg-white dark:bg-zinc-950 rounded-xl border dark:border-zinc-800 shadow-sm p-8 text-center space-y-6">
             <img src="/kirmizi-logo.png" alt="Logo" className="h-16 object-contain mx-auto" />
             <div>
