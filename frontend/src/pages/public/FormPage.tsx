@@ -267,6 +267,18 @@ function FormPageContent() {
           <img src="/kirmizi-logo.png" alt="Logo" className="h-16 object-contain" />
         </div>
 
+        {hasExistingSubmission && (
+          <div className="mb-5 flex gap-3 items-start bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg px-4 py-3">
+            <svg className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+            <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+              Önceki tercihleriniz yüklendi. Değişiklik yapıp{" "}
+              <span className="font-medium">Güncelle</span>'ye basabilirsiniz.
+            </p>
+          </div>
+        )}
+
         <div className="mb-8">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             Danışman Seçimi
