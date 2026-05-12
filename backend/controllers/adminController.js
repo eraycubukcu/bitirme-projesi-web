@@ -121,36 +121,12 @@ export const triggerCascade = async (req, res) => {
   }
 };
 
-export const assignStudents = async (req, res) => {
+export const getTeachersAdmin = async (req, res) => {
   try {
-    const { studentId, teacherId } = req.body;
-
-    const student = await Student.findById(studentId);
-    const teacher = await Teacher.findById(teacherId);
-
-    if (!student || !teacher) {
-      return res.status(404).json({ message: "Veri bulunamadı" });
-    }
-
-    if (teacher.currentCount >= teacher.maxQuota) {
-      return res.status(400).json({ message: "Bu hocanın kontenjanı dolu" });
-    }
-
-    if (student.assignedTeacher) {
-      await Teacher.findByIdAndUpdate(student.assignedTeacher, {
-        $inc: { currentCount: -1 },
-      });
-    }
-
-    student.assignedTeacher = teacher._id;
-    student.status = "assigned";
-    await student.save();
-
-    await Teacher.findByIdAndUpdate(teacher._id, { $inc: { currentCount: 1 } });
-
-    res.json({ message: "Atama başarılı" });
+    const teachers = await Teacher.find().sort({ createdAt: -1 });
+    res.json(teachers);
   } catch (error) {
-    res.status(500).json({ message: "Atama hatası" });
+    res.status(500).json({ message: "Server hatası" });
   }
 };
 

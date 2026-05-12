@@ -246,7 +246,7 @@ export const createTeacher = async (req, res) => {
 
 export const getTeachers = async (req, res) => {
   try {
-    const teachers = await Teacher.find().sort({ createdAt: -1 });
+    const teachers = await Teacher.find().select("_id name bio").sort({ createdAt: -1 });
     res.json(teachers);
   } catch (error) {
     res.status(500).json({ message: "Server hatası" });

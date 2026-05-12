@@ -22,7 +22,7 @@ const TeachersPage = () => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await api.get("/teachers");
+      const res = await api.get("/admin/teachers");
       setTeachers(res.data);
     } catch {
       setFetchError("Danışmanlar yüklenemedi.");

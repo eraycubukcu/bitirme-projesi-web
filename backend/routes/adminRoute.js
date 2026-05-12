@@ -3,8 +3,8 @@ import rateLimit from "express-rate-limit";
 import {
   adminLogin,
   getDashboard,
-  assignStudents,
   getAssignedStudents,
+  getTeachersAdmin,
   triggerCascade,
 } from "../controllers/adminController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -21,7 +21,7 @@ const loginLimiter = rateLimit({
 
 router.post("/login", loginLimiter, adminLogin);
 router.get("/dashboard", protect, getDashboard);
-router.post("/assigned", protect, assignStudents);
+router.get("/teachers", protect, getTeachersAdmin);
 router.get("/assigned", protect, getAssignedStudents);
 router.post("/cascade", protect, triggerCascade);
 

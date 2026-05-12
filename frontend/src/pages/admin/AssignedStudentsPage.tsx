@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
-import { toast } from "sonner";
 import api from "../../services/api";
 import { SkeletonBlock, SkeletonLine, SkeletonRow } from "../components/Skeleton";
 
@@ -9,15 +8,12 @@ const AssignedStudentsPage = () => {
   const [teachers, setTeachers] = useState<any[]>([]);
   const [formConfig, setFormConfig] = useState<any>(null);
   const [fetchError, setFetchError] = useState("");
-  const [selectedTeacher, setSelectedTeacher] = useState<Record<string, string>>({});
-  const [assigning, setAssigning] = useState<string | null>(null);
-  const [assignError, setAssignError] = useState("");
 
   const fetchAll = async () => {
     try {
       const [sRes, tRes, fRes] = await Promise.all([
         api.get("/admin/assigned"),
-        api.get("/teachers"),
+        api.get("/admin/teachers"),
         api.get("/form"),
       ]);
       setStudents(sRes.data);
@@ -32,21 +28,6 @@ const AssignedStudentsPage = () => {
   useEffect(() => {
     fetchAll();
   }, []);
-
-  const handleAssign = async (studentId: string) => {
-    const teacherId = selectedTeacher[studentId];
-    if (!teacherId) return;
-    setAssigning(studentId);
-    try {
-      await api.post("/admin/assigned", { studentId, teacherId });
-      await fetchAll();
-      toast.success("Öğrenci atandı.");
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Atama başarısız.");
-    } finally {
-      setAssigning(null);
-    }
-  };
 
   const exportTeacherExcel = (teacher: any, group: any[]) => {
     const header = ["Öğrenci No", "Danışman"];
@@ -104,13 +85,6 @@ const AssignedStudentsPage = () => {
       <p className="text-sm text-gray-400 mb-4">
         Atanan: {assigned.length} · Atanmayan: {unassigned.length} · Toplam: {students.length}
       </p>
-
-      {assignError && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-600 dark:text-red-400 flex items-center justify-between">
-          <span>{assignError}</span>
-          <button onClick={() => setAssignError("")} className="ml-3 text-red-400 hover:text-red-600">✕</button>
-        </div>
-      )}
 
       {/* Hocaya göre gruplar */}
       {teachers.map((teacher) => {
@@ -190,14 +164,13 @@ const AssignedStudentsPage = () => {
                 <div
                   className="grid bg-red-50 dark:bg-red-900/20 text-xs font-medium p-3 text-gray-600 dark:text-zinc-300"
                   style={{
-                    gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr)) 180px 160px`,
+                    gridTemplateColumns: `repeat(${columns.length}, minmax(120px, 1fr)) 180px`,
                   }}
                 >
                   {columns.map((col: any) => (
                     <div key={col.key}>{col.label}</div>
                   ))}
                   <div>Tercihler</div>
-                  <div>Manuel Ata</div>
                 </div>
               )}
               {unassigned.map((s) => (
@@ -206,7 +179,7 @@ const AssignedStudentsPage = () => {
                   className="grid items-center p-3 border-t dark:border-zinc-800 text-sm text-gray-700 dark:text-white"
                   style={{
                     gridTemplateColumns: columns.length > 0
-                      ? `repeat(${columns.length}, minmax(120px, 1fr)) 180px 160px`
+                      ? `repeat(${columns.length}, minmax(120px, 1fr)) 180px`
                       : "1fr",
                   }}
                 >
@@ -217,32 +190,6 @@ const AssignedStudentsPage = () => {
                     {s.preferences?.map((p: any, i: number) => (
                       <div key={i}>{i + 1}. {p?.name || p}</div>
                     ))}
-                  </div>
-                  <div className="flex flex-col gap-1.5 pr-2">
-                    <select
-                      value={selectedTeacher[s._id] || ""}
-                      onChange={(e) => setSelectedTeacher((prev) => ({ ...prev, [s._id]: e.target.value }))}
-                      className="border dark:border-zinc-700 rounded px-2 py-1.5 text-xs
-                      bg-white dark:bg-zinc-900 text-gray-700 dark:text-white
-                      focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white"
-                    >
-                      <option value="">Hoca seç...</option>
-                      {teachers
-                        .filter((t) => t.currentCount < t.maxQuota)
-                        .map((t) => (
-                          <option key={t._id} value={t._id}>
-                            {t.name} ({t.currentCount}/{t.maxQuota})
-                          </option>
-                        ))}
-                    </select>
-                    <button
-                      onClick={() => handleAssign(s._id)}
-                      disabled={!selectedTeacher[s._id] || assigning === s._id}
-                      className="text-xs px-2 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-black rounded
-                      disabled:opacity-40 disabled:cursor-not-allowed hover:bg-black dark:hover:bg-zinc-100 transition"
-                    >
-                      {assigning === s._id ? "Atanıyor..." : "Ata"}
-                    </button>
                   </div>
                 </div>
               ))}
