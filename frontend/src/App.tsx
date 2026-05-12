@@ -22,16 +22,16 @@ function App() {
 
   useEffect(() => {
     const id = api.interceptors.request.use(async (config) => {
-      // Clerk oturumu varsa Clerk token'ını kullan (öğrenci formu)
-      const clerkToken = await getToken();
-      if (clerkToken) {
-        config.headers["Authorization"] = `Bearer ${clerkToken}`;
-        return config;
-      }
-      // Clerk oturumu yoksa localStorage JWT'yi kullan (admin/hoca)
+      // Admin/hoca JWT varsa onu kullan (öncelik)
       const jwtToken = localStorage.getItem("token");
       if (jwtToken) {
         config.headers["Authorization"] = `Bearer ${jwtToken}`;
+        return config;
+      }
+      // JWT yoksa Clerk token'ını kullan (öğrenci formu)
+      const clerkToken = await getToken();
+      if (clerkToken) {
+        config.headers["Authorization"] = `Bearer ${clerkToken}`;
       }
       return config;
     });
