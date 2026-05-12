@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useAuth } from "@clerk/clerk-react";
@@ -19,6 +19,8 @@ import api from "./services/api";
 
 function App() {
   const { getToken } = useAuth();
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken; // render sırasında senkron güncelleme
 
   useEffect(() => {
     const id = api.interceptors.request.use(async (config) => {
@@ -29,14 +31,14 @@ function App() {
         return config;
       }
       // JWT yoksa Clerk token'ını kullan (öğrenci formu)
-      const clerkToken = await getToken();
+      const clerkToken = await getTokenRef.current();
       if (clerkToken) {
         config.headers["Authorization"] = `Bearer ${clerkToken}`;
       }
       return config;
     });
     return () => api.interceptors.request.eject(id);
-  }, [getToken]);
+  }, []); // Interceptor bir kez eklenir, ref sayesinde her zaman güncel token kullanılır
 
   return (
     <>
