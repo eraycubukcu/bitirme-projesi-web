@@ -1,6 +1,9 @@
-﻿import Teacher from "../models/Teacher.js";
+﻿import bcrypt from "bcryptjs";
+import Teacher from "../models/Teacher.js";
 import Student from "../models/Student.js";
 import jwt from "jsonwebtoken";
+
+const DUMMY_HASH = "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234u";
 
 // ─── Cascade algoritması ──────────────────────────────────────────────────────
 // Atanmamış öğrencileri sıradaki tercihlerine atar. Aynı hocayı isteyen
@@ -80,8 +83,14 @@ export const teacherLogin = async (req, res) => {
       return res.status(400).json({ message: "Kullanıcı adı ve şifre zorunludur." });
     }
 
+    if (typeof password !== "string" || password.length > 128) {
+      return res.status(400).json({ message: "Geçersiz şifre." });
+    }
+
     const teacher = await Teacher.findOne({ username: username.trim() });
-    const isMatch = teacher ? await teacher.comparePassword(password) : false;
+    const isMatch = teacher
+      ? await teacher.comparePassword(password)
+      : (await bcrypt.compare(password, DUMMY_HASH), false);
 
     if (!teacher || !isMatch) {
       return res.status(401).json({ message: "Kullanıcı adı veya şifre hatalı." });

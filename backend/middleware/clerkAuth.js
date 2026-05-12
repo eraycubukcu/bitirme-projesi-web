@@ -22,7 +22,7 @@ export const requireStudent = async (req, res, next) => {
     }
 
     const domain = process.env.ALLOWED_EMAIL_DOMAIN;
-    if (domain && !email.endsWith(`@${domain}`)) {
+    if (domain && !email.toLowerCase().endsWith(`@${domain.toLowerCase()}`)) {
       return res.status(403).json({
         message: `Sadece @${domain} uzantılı hesaplar kabul edilmektedir.`,
       });

@@ -1,9 +1,13 @@
-﻿import Admin from "../models/Admin.js";
+﻿import bcrypt from "bcryptjs";
+import Admin from "../models/Admin.js";
 import jwt from "jsonwebtoken";
 import Student from "../models/Student.js";
 import Teacher from "../models/Teacher.js";
 import FormConfig from "../models/FormConfig.js";
 import { runCascade } from "./teacherController.js";
+
+// Timing attack önlemi: kullanıcı bulunamasa bile sabit süreli karşılaştırma yapılır
+const DUMMY_HASH = "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234u";
 
 export const adminLogin = async (req, res) => {
   try {
@@ -13,8 +17,14 @@ export const adminLogin = async (req, res) => {
       return res.status(400).json({ message: "Kullanıcı adı ve şifre zorunludur." });
     }
 
+    if (typeof password !== "string" || password.length > 128) {
+      return res.status(400).json({ message: "Geçersiz şifre." });
+    }
+
     const admin = await Admin.findOne({ username: username.trim() });
-    const isMatch = admin ? await admin.comparePassword(password) : false;
+    const isMatch = admin
+      ? await admin.comparePassword(password)
+      : (await bcrypt.compare(password, DUMMY_HASH), false);
 
     if (!admin || !isMatch) {
       return res.status(401).json({ message: "Kullanıcı adı veya şifre hatalı." });

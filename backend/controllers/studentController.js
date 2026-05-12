@@ -82,6 +82,12 @@ export const submitForm = async (req, res) => {
     // Clerk ile giriş yapılmışsa upsert, yoksa yeni kayıt (eski akış)
     let student;
     if (req.student?.clerkUserId) {
+      const existing = await Student.findOne({ clerkUserId: req.student.clerkUserId });
+
+      if (existing?.status === "assigned") {
+        return res.status(403).json({ message: "Danışman atamanız tamamlandı, tercihleriniz artık değiştirilemez." });
+      }
+
       student = await Student.findOneAndUpdate(
         { clerkUserId: req.student.clerkUserId },
         {
