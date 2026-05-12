@@ -86,9 +86,26 @@ export const getDashboard = async (req, res) => {
 // Admin manual cascade
 export const triggerCascade = async (req, res) => {
   try {
+    const { force } = req.body;
+
+    const [totalTeachers, finalizedCount] = await Promise.all([
+      Teacher.countDocuments(),
+      Teacher.countDocuments({ hasFinalized: true }),
+    ]);
+
+    const allFinalized = totalTeachers > 0 && finalizedCount === totalTeachers;
+
+    if (!allFinalized && !force) {
+      return res.status(409).json({
+        message: `${totalTeachers - finalizedCount} danışman henüz öğrenci seçimini tamamlamadı.`,
+        allFinalized: false,
+        finalizedCount,
+        totalTeachers,
+      });
+    }
+
     await runCascade();
 
-    // Cascade çalıştı olarak işaretle
     await FormConfig.findOneAndUpdate({}, { cascadeExecuted: true });
 
     const total = await Student.countDocuments();

@@ -73,13 +73,27 @@ app.listen(PORT, () => {
 });
 
 // ── Otomatik cascade zamanlayıcısı (her 60 saniyede bir kontrol) ──────────────
+// Tarih geçmiş olsa bile tüm hocalar seçimini tamamlamadan başlamaz.
+// Başlatmak için admin "Manuel Başlat" kullanmalıdır.
 setInterval(async () => {
   try {
     const form = await FormConfig.findOne();
     if (!form?.cascadeDate || form.cascadeExecuted) return;
     if (new Date(form.cascadeDate) > new Date()) return;
 
-    console.log("[Zamanlayıcı] Otomatik atama tarihi geldi, çalıştırılıyor...");
+    const [totalTeachers, finalizedCount] = await Promise.all([
+      Teacher.countDocuments(),
+      Teacher.countDocuments({ hasFinalized: true }),
+    ]);
+
+    if (totalTeachers === 0 || finalizedCount < totalTeachers) {
+      console.log(
+        `[Zamanlayıcı] Cascade tarihi geçti ama ${totalTeachers - finalizedCount} hoca henüz onaylamadı — bekleniyor.`
+      );
+      return;
+    }
+
+    console.log("[Zamanlayıcı] Tüm hocalar onayladı, otomatik atama başlıyor...");
     await runCascade();
     await FormConfig.findByIdAndUpdate(form._id, { cascadeExecuted: true });
     console.log("[Zamanlayıcı] Otomatik cascade tamamlandı.");

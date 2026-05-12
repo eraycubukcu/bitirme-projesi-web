@@ -15,6 +15,7 @@ const Dashboard = () => {
   const [fetchError, setFetchError] = useState("");
   const [cascading, setCascading] = useState(false);
   const [showCascadeConfirm, setShowCascadeConfirm] = useState(false);
+  const [forceMode, setForceMode] = useState(false);
   const [cascadeResult, setCascadeResult] = useState<CascadeResult | null>(null);
   const [cascadeError, setCascadeError] = useState("");
 
@@ -33,13 +34,13 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
-  const handleCascade = async () => {
+  const handleCascade = async (force = false) => {
     setCascading(true);
     setShowCascadeConfirm(false);
     setCascadeResult(null);
     setCascadeError("");
     try {
-      const res = await api.post("/admin/cascade");
+      const res = await api.post("/admin/cascade", { force });
       setCascadeResult(res.data);
       toast.success(`Atama tamamlandı — ${res.data.assignedCount} öğrenci atandı.`);
       await fetchData();
@@ -47,6 +48,7 @@ const Dashboard = () => {
       toast.error("Otomatik atama sırasında hata oluştu.");
     } finally {
       setCascading(false);
+      setForceMode(false);
     }
   };
 
@@ -325,22 +327,34 @@ const Dashboard = () => {
             )}
 
             {!cascadeResult && showCascadeConfirm ? (
-              <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg space-y-2">
+              <div className={`p-3 rounded-lg border space-y-2 ${
+                forceMode
+                  ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                  : "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800"
+              }`}>
+                {forceMode && (
+                  <p className="text-xs font-semibold text-red-600 dark:text-red-400">
+                    ⚠ {teacherCount - finalizedCount} danışman henüz seçimini tamamlamadı.
+                    Bu öğrenciler 2. tercihlerinden itibaren atanacak.
+                  </p>
+                )}
                 <p className="text-xs text-gray-600 dark:text-zinc-300">
-                  Onaylanmayan öğrenciler 2. tercihlerinden itibaren atanacak.
-                  Bu işlem geri alınamaz.
+                  {forceMode
+                    ? "Yine de devam etmek istiyor musunuz? Bu işlem geri alınamaz."
+                    : "Onaylanmayan öğrenciler 2. tercihlerinden itibaren atanacak. Bu işlem geri alınamaz."}
                 </p>
                 <div className="flex gap-2 pt-1">
                   <button
-                    onClick={handleCascade}
+                    onClick={() => handleCascade(forceMode)}
                     disabled={cascading}
-                    className="text-xs px-3 py-1.5 bg-orange-500 text-white rounded-lg
-                    hover:bg-orange-600 transition disabled:opacity-50"
+                    className={`text-xs px-3 py-1.5 text-white rounded-lg transition disabled:opacity-50 ${
+                      forceMode ? "bg-red-500 hover:bg-red-600" : "bg-orange-500 hover:bg-orange-600"
+                    }`}
                   >
                     {cascading ? "Çalışıyor..." : "Evet, Başlat"}
                   </button>
                   <button
-                    onClick={() => setShowCascadeConfirm(false)}
+                    onClick={() => { setShowCascadeConfirm(false); setForceMode(false); }}
                     className="text-xs px-3 py-1.5 border dark:border-zinc-700 rounded-lg text-gray-600 dark:text-zinc-300
                     hover:bg-gray-50 dark:hover:bg-zinc-900 transition"
                   >
@@ -357,6 +371,7 @@ const Dashboard = () => {
                   onClick={() => {
                     setCascadeResult(null);
                     setCascadeError("");
+                    setForceMode(false);
                     setShowCascadeConfirm(true);
                   }}
                   disabled={cascading}
@@ -367,9 +382,24 @@ const Dashboard = () => {
                 </button>
               </div>
             ) : !cascadeResult ? (
-              <p className="text-xs text-gray-400">
-                Tüm danışmanlar onayladığında atamayı başlatabilirsiniz. ({finalizedCount}/{teacherCount})
-              </p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-gray-400">
+                  Tüm danışmanlar onayladığında atamayı başlatabilirsiniz. ({finalizedCount}/{teacherCount})
+                </p>
+                <button
+                  onClick={() => {
+                    setCascadeResult(null);
+                    setCascadeError("");
+                    setForceMode(true);
+                    setShowCascadeConfirm(true);
+                  }}
+                  disabled={cascading}
+                  className="text-xs px-3 py-1.5 border border-red-300 dark:border-red-800 text-red-500 dark:text-red-400
+                  rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50 flex-shrink-0"
+                >
+                  Zorla Başlat
+                </button>
+              </div>
             ) : null}
           </div>
         </div>
