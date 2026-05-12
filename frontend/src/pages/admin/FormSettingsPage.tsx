@@ -133,7 +133,6 @@ const FormSettingsPage = () => {
         description: form.description,
         startDate: toUTC(startInput),
         endDate: toUTC(endInput),
-        uniqueField: form.uniqueField || null,
         cascadeDate: toUTC(cascadeInput),
       });
       await fetchForm();
@@ -157,7 +156,6 @@ const FormSettingsPage = () => {
         description: form.description,
         startDate: null,
         endDate: null,
-        uniqueField: form.uniqueField || null,
         cascadeDate: toUTC(cascadeInput),
       });
       setStartInput("");
@@ -500,38 +498,6 @@ const FormSettingsPage = () => {
           </div>
         )}
       </div>
-
-      {/* ── Tekrar Başvuru Engeli ──────────────────────────────── */}
-      {form.textFields.length > 0 && (
-        <div className="border dark:border-zinc-800 rounded-xl p-4 mb-6 bg-gray-50 dark:bg-zinc-900">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-white mb-1">Tekrar Başvuru Engeli</h2>
-          <p className="text-xs text-gray-400 mb-3">
-            Seçilen alan aynı değerle ikinci kez başvuruyu engeller.
-          </p>
-          <select
-            value={form.uniqueField || ""}
-            onChange={(e) => {
-              setForm({ ...form, uniqueField: e.target.value || null });
-              markDirty();
-            }}
-            className="w-full border dark:border-zinc-800 rounded-lg px-3 py-2 text-sm
-            bg-white dark:bg-zinc-900 text-gray-700 dark:text-white
-            focus:outline-none focus:ring-1 focus:ring-gray-900 dark:focus:ring-white"
-          >
-            <option value="">Kontrol yapma</option>
-            {form.textFields.map((f: any) => (
-              <option key={f.key} value={f.key}>{f.label}</option>
-            ))}
-          </select>
-          {form.uniqueField && (
-            <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
-              Aynı <span className="font-medium">
-                {form.textFields.find((f: any) => f.key === form.uniqueField)?.label || form.uniqueField}
-              </span> değeriyle ikinci başvuru reddedilecek.
-            </p>
-          )}
-        </div>
-      )}
 
       {/* ── Alan Ekle Modal ────────────────────────────────────── */}
       {showAddModal && (

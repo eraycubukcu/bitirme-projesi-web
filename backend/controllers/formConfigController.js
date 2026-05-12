@@ -32,7 +32,7 @@ export const getForm = async (req, res) => {
 
 export const updateForm = async (req, res) => {
   try {
-    const { textFields, description, startDate, endDate, uniqueField, cascadeDate } = req.body;
+    const { textFields, description, startDate, endDate, cascadeDate } = req.body;
 
     if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
       return res.status(400).json({ message: "Kapanış tarihi açılış tarihinden sonra olmalıdır." });
@@ -44,7 +44,6 @@ export const updateForm = async (req, res) => {
       form = new FormConfig({
         textFields: enforceGpaField(textFields ?? []),
         description, startDate, endDate,
-        uniqueField: uniqueField || null,
         cascadeDate: cascadeDate || null,
         cascadeExecuted: false,
       });
@@ -54,7 +53,6 @@ export const updateForm = async (req, res) => {
       form.description  = description  !== undefined ? description  : form.description;
       form.startDate    = startDate    !== undefined ? startDate    : form.startDate;
       form.endDate      = endDate      !== undefined ? endDate      : form.endDate;
-      form.uniqueField  = uniqueField  !== undefined ? (uniqueField || null) : form.uniqueField;
 
       if (cascadeDate !== undefined) {
         const newDate = cascadeDate ? new Date(cascadeDate) : null;

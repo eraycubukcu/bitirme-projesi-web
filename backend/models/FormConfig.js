@@ -14,7 +14,6 @@ const formConfigSchema = new mongoose.Schema(
     endDate:         { type: Date },
     description:     { type: String },
     textFields:      [fieldSchema],
-    uniqueField:     { type: String, default: null },
     cascadeDate:     { type: Date, default: null },
     cascadeExecuted: { type: Boolean, default: false },
   },

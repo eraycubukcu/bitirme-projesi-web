@@ -79,24 +79,6 @@ export const submitForm = async (req, res) => {
       }
     }
 
-    // Tekrar başvuru engeli — aynı öğrenci güncelleyebilir, sadece farklı kullanıcıları kontrol et
-    if (form.uniqueField) {
-      const uniqueValue = formData[form.uniqueField]?.toString().trim();
-      if (uniqueValue) {
-        const query = { [`formData.${form.uniqueField}`]: uniqueValue };
-        if (req.student?.clerkUserId) {
-          query.clerkUserId = { $ne: req.student.clerkUserId };
-        }
-        const existing = await Student.findOne(query);
-        if (existing) {
-          const fieldLabel = form.textFields.find((f) => f.key === form.uniqueField)?.label || form.uniqueField;
-          return res.status(400).json({
-            message: `Bu ${fieldLabel} ile daha önce başvuru yapılmış.`,
-          });
-        }
-      }
-    }
-
     // Clerk ile giriş yapılmışsa upsert, yoksa yeni kayıt (eski akış)
     let student;
     if (req.student?.clerkUserId) {
