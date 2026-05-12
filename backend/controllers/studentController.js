@@ -16,12 +16,10 @@ export const submitForm = async (req, res) => {
       return res.status(403).json({ message: "Form bulunamadı." });
     }
 
-    // Form açık mı? Tarih aralığına göre kontrol et
+    // Form açık mı?
     const now = new Date();
     const start = form.startDate ? new Date(form.startDate) : null;
     const end = form.endDate ? new Date(form.endDate) : null;
-
-    // Tarih girilmemişse form kapalı
     const isOpen = (start || end) && (!start || now >= start) && (!end || now <= end);
 
     if (!isOpen) {
@@ -52,8 +50,8 @@ export const submitForm = async (req, res) => {
           }
         } else if (field.key === "gpa") {
           const num = parseFloat(value);
-          if (isNaN(num) || num < 0 || num > 4 || !/^\d+(\.\d{1,2})?$/.test(value)) {
-            return res.status(400).json({ message: `"${field.label}" 0.00 ile 4.00 arasında, en fazla 2 ondalık basamaklı olmalıdır (örn: 2.40).` });
+          if (isNaN(num) || num < 0 || num > 4 || !/^\d(\.\d{1,2})?$/.test(value)) {
+            return res.status(400).json({ message: `"${field.label}" 0 ile 4 arasında, en fazla 2 ondalık basamaklı olmalıdır.` });
           }
         } else if (field.fieldType === "number") {
           if (!/^\d+$/.test(value)) {
@@ -74,20 +72,22 @@ export const submitForm = async (req, res) => {
       return res.status(400).json({ message: "Aynı hoca birden fazla seçilemez" });
     }
 
-    for (let teacherId of preferences) {
+    for (const teacherId of preferences) {
       const teacher = await Teacher.findById(teacherId);
       if (!teacher) {
         return res.status(400).json({ message: "Hoca bulunamadı" });
       }
     }
 
-    // Tekrar başvuru kontrolü
+    // Tekrar başvuru engeli — aynı öğrenci güncelleyebilir, sadece farklı kullanıcıları kontrol et
     if (form.uniqueField) {
       const uniqueValue = formData[form.uniqueField]?.toString().trim();
       if (uniqueValue) {
-        const existing = await Student.findOne({
-          [`formData.${form.uniqueField}`]: uniqueValue,
-        });
+        const query = { [`formData.${form.uniqueField}`]: uniqueValue };
+        if (req.student?.clerkUserId) {
+          query.clerkUserId = { $ne: req.student.clerkUserId };
+        }
+        const existing = await Student.findOne(query);
         if (existing) {
           const fieldLabel = form.textFields.find((f) => f.key === form.uniqueField)?.label || form.uniqueField;
           return res.status(400).json({
@@ -97,7 +97,26 @@ export const submitForm = async (req, res) => {
       }
     }
 
-    const student = await Student.create({ formData, preferences });
+    // Clerk ile giriş yapılmışsa upsert, yoksa yeni kayıt (eski akış)
+    let student;
+    if (req.student?.clerkUserId) {
+      student = await Student.findOneAndUpdate(
+        { clerkUserId: req.student.clerkUserId },
+        {
+          $set: {
+            formData,
+            preferences,
+            email: req.student.email,
+            firstName: req.student.firstName,
+            lastName: req.student.lastName,
+          },
+          $setOnInsert: { status: "unassigned" },
+        },
+        { upsert: true, new: true }
+      );
+    } else {
+      student = await Student.create({ formData, preferences });
+    }
 
     res.status(201).json({ message: "Form gönderildi", student });
   } catch (error) {
@@ -106,9 +125,21 @@ export const submitForm = async (req, res) => {
   }
 };
 
+export const getMySubmission = async (req, res) => {
+  try {
+    const student = await Student.findOne({ clerkUserId: req.student.clerkUserId })
+      .populate("preferences")
+      .populate("assignedTeacher");
+
+    res.json({ student: student || null });
+  } catch (error) {
+    res.status(500).json({ message: "Server hatası" });
+  }
+};
+
 export const getStudents = async (req, res) => {
   try {
-    const students = await Student.find()
+    const students = await Student.find({ formData: { $ne: {} } })
       .populate("preferences")
       .populate("assignedTeacher")
       .sort({ createdAt: -1 });

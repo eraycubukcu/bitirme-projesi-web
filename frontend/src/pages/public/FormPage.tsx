@@ -3,13 +3,16 @@ import api from "../../services/api";
 import type { Field, FormConfig } from "../../types";
 import { useTheme } from "../../ThemeContext";
 import { SkeletonField, SkeletonLine, SkeletonPreferenceItem } from "../components/Skeleton";
+import AuthGate from "../../components/AuthGate";
+import { toast } from "sonner";
 
-function FormPage() {
+function FormPageContent() {
   const [form, setForm] = useState<FormConfig | null>(null);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [hasExistingSubmission, setHasExistingSubmission] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -21,10 +24,32 @@ function FormPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const formRes = await api.get("/form");
-        const teacherRes = await api.get("/teachers");
+        const [formRes, teacherRes, myRes] = await Promise.all([
+          api.get("/form"),
+          api.get("/teachers"),
+          api.get("/students/me").catch(() => ({ data: { student: null } })),
+        ]);
+
         setForm(formRes.data);
-        setTeachers(teacherRes.data);
+        const allTeachers: any[] = teacherRes.data;
+        const existingStudent = myRes.data.student;
+
+        if (existingStudent?.formData && Object.keys(existingStudent.formData).length > 0) {
+          setFormData(existingStudent.formData);
+          setHasExistingSubmission(true);
+          if (existingStudent.preferences?.length > 0) {
+            const prefIds: string[] = existingStudent.preferences.map((p: any) => p._id || p);
+            const ordered = [
+              ...prefIds.map((id) => allTeachers.find((t) => t._id === id)).filter(Boolean),
+              ...allTeachers.filter((t) => !prefIds.includes(t._id)),
+            ];
+            setTeachers(ordered);
+          } else {
+            setTeachers(allTeachers);
+          }
+        } else {
+          setTeachers(allTeachers);
+        }
       } catch {
         setError("Veriler yüklenemedi. Lütfen sayfayı yenileyin.");
       }
@@ -176,7 +201,12 @@ function FormPage() {
         preferences: teachers.map((t) => t._id),
       });
 
-      setSubmitted(true);
+      if (hasExistingSubmission) {
+        toast.success("Tercihleriniz güncellendi.");
+      } else {
+        setSubmitted(true);
+      }
+      setHasExistingSubmission(true);
     } catch (err: any) {
       const msg = err.response?.data?.message;
       setError(msg || "Bir hata oluştu.");
@@ -399,11 +429,17 @@ function FormPage() {
           className="w-full py-3 text-white bg-gray-900 dark:bg-white dark:text-black
           hover:bg-black dark:hover:bg-zinc-100 rounded-lg transition disabled:opacity-50"
         >
-          {isSubmitting ? "Gönderiliyor..." : "Gönder"}
+          {isSubmitting ? (hasExistingSubmission ? "Güncelleniyor..." : "Gönderiliyor...") : (hasExistingSubmission ? "Güncelle" : "Gönder")}
         </button>
       </div>
     </div>
   );
 }
 
-export default FormPage;
+export default function FormPage() {
+  return (
+    <AuthGate>
+      <FormPageContent />
+    </AuthGate>
+  );
+}

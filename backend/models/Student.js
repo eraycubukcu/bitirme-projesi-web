@@ -2,9 +2,23 @@ import mongoose from "mongoose";
 
 const studentSchema = new mongoose.Schema(
   {
+    clerkUserId: {
+      type: String,
+      sparse: true,
+      unique: true,
+      index: true,
+    },
+    email: {
+      type: String,
+      sparse: true,
+      lowercase: true,
+    },
+    firstName: { type: String, default: "" },
+    lastName:  { type: String, default: "" },
+
     formData: {
       type: Object,
-      required: true,
+      default: {},
     },
 
     preferences: [

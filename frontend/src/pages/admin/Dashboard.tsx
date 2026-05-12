@@ -87,8 +87,6 @@ const Dashboard = () => {
   } = data;
 
   const assignedPct = studentCount > 0 ? Math.round((assignedCount / studentCount) * 100) : 0;
-  const notFinished: any[] = (teachers ?? []).filter((t: any) => !t.hasFinalized);
-
   const formatDate = (d: string) =>
     d ? new Date(d).toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" }) : "—";
 

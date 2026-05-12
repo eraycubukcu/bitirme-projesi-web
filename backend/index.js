@@ -1,5 +1,5 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv";
 import helmet from "helmet";
 import cors from "cors";
 import connectDB from "./config/db.js";
@@ -7,10 +7,10 @@ import adminRoutes from "./routes/adminRoute.js";
 import teacherRoutes from "./routes/teacherRoute.js";
 import formRoutes from "./routes/formRoute.js";
 import studentRoutes from "./routes/studentRoute.js";
+import authRoutes from "./routes/authRoute.js";
 import FormConfig from "./models/FormConfig.js";
 import { runCascade } from "./controllers/teacherController.js";
-
-dotenv.config();
+import { clerkMw } from "./middleware/clerkAuth.js";
 
 // JWT_SECRET zorunlu — eksikse başlatma
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 16) {
@@ -48,8 +48,12 @@ app.use(
 // ── Body limiti (büyük payload saldırılarına karşı) ────────────────────────
 app.use(express.json({ limit: "10kb" }));
 
+// ── Clerk middleware (JWT parse, route'ları korumaz — sadece auth bilgisini set eder) ──
+app.use(clerkMw);
+
 // ── Rotalar ───────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
+app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/form", formRoutes);
