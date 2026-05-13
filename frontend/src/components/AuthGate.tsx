@@ -63,6 +63,7 @@ function useGoogleSignIn() {
       const attempt = await signIn.create({
         strategy: "oauth_google",
         redirectUrl: `${window.location.origin}/sso-callback`,
+        actionCompleteRedirectUrl: window.location.origin,
         oidcPrompt: "select_account",
       });
       const oauthUrl = attempt.firstFactorVerification.externalVerificationRedirectURL;
