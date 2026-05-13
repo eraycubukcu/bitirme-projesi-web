@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
-import { useAuth } from "@clerk/clerk-react";
+import { AuthenticateWithRedirectCallback, useAuth } from "@clerk/clerk-react";
 import FormPage from "./pages/public/FormPage";
 import LoginPage from "./pages/admin/LoginPage";
 import AdminLayout from "./pages/layouts/AdminLayout";
@@ -79,6 +79,7 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
+        <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
