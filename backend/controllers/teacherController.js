@@ -1,7 +1,6 @@
 ﻿import bcrypt from "bcryptjs";
 import Teacher from "../models/Teacher.js";
 import Student from "../models/Student.js";
-import FormConfig from "../models/FormConfig.js";
 import jwt from "jsonwebtoken";
 
 const DUMMY_HASH = "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234u";
@@ -164,12 +163,6 @@ export const finalizeApproval = async (req, res) => {
 
     let teacher = await Teacher.findById(teacherId);
 
-    // Cascade çalıştıktan sonra seçim değiştirilemez
-    const formConfig = await FormConfig.findOne();
-    if (formConfig?.cascadeExecuted) {
-      return res.status(403).json({ message: "Otomatik atama tamamlandı, seçimler artık değiştirilemez." });
-    }
-
     // Güncelleme: önceki onayları geri al (re-finalizasyon desteği)
     if (teacher.hasFinalized) {
       const previouslyApproved = await Student.find({
@@ -220,15 +213,10 @@ export const finalizeApproval = async (req, res) => {
     const finalizedCount = totalTeachers - pendingCount;
     const allFinalized = pendingCount === 0;
 
-    if (allFinalized) {
-      await runCascade();
-      await FormConfig.findOneAndUpdate({}, { cascadeExecuted: true });
-    }
+    // Otomatik cascade kaldırıldı — admin "Manuel Başlat" ile tetikler
 
     res.json({
-      message: allFinalized
-        ? `Tüm hocalar tamamladı. Otomatik atama çalıştırıldı.`
-        : `Onayınız alındı. ${finalizedCount}/${totalTeachers} hoca tamamladı.`,
+      message: `Onayınız alındı. ${finalizedCount}/${totalTeachers} hoca tamamladı.`,
       allFinalized,
       finalizedCount,
       totalTeachers,
