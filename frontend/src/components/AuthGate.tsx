@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import api from "../services/api";
 
 const ALLOWED_DOMAIN = import.meta.env.VITE_ALLOWED_EMAIL_DOMAIN || "okul.edu.tr";
-const AUTH_ERROR_KEY = "auth_pending_error";
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -19,7 +18,7 @@ interface AuthGateProps {
 function SyncGuard({ children }: AuthGateProps) {
   const { isLoaded } = useAuth();
   const { signOut } = useClerk();
-  const [status, setStatus] = useState<"loading" | "ok">("loading");
+  const [status, setStatus] = useState<"loading" | "ok" | "rejected">("loading");
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -32,18 +31,14 @@ function SyncGuard({ children }: AuthGateProps) {
             ? err.response.data?.message ||
               `Bu hesap kabul edilmiyor. Lütfen @${ALLOWED_DOMAIN} uzantılı okul hesabınızla giriş yapın.`
             : "Kimlik doğrulaması başarısız. Lütfen tekrar deneyin.";
-        // Mesajı sakla — sayfa yenilendikten sonra gösterilir.
-        sessionStorage.setItem(AUTH_ERROR_KEY, msg);
-        // signOut tamamlandıktan sonra tam sayfa yenile; bu Clerk sign-in
-        // state'ini sıfırlar ve bir sonraki authenticateWithRedirect çağrısı
-        // Google'a oidcPrompt=select_account ile yeni bir OAuth akışı başlatır.
-        signOut().then(() => {
-          window.location.replace(window.location.origin);
-        });
+        toast.error(msg, { duration: 6000 });
+        setStatus("rejected");
+        // Toast okunabilsin diye kısa bir gecikme sonra sign out
+        setTimeout(() => signOut(), 1500);
       });
   }, [isLoaded, signOut]);
 
-  if (status === "loading") {
+  if (status === "loading" || status === "rejected") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
         <div className="w-8 h-8 border-2 border-gray-300 dark:border-zinc-700 border-t-gray-900 dark:border-t-white rounded-full animate-spin" />
@@ -62,8 +57,6 @@ function useGoogleSignIn() {
     if (!isLoaded || !signIn || isStarting) return;
     setIsStarting(true);
     try {
-      // oidcPrompt: 'select_account' → Google OAuth URL'e prompt=select_account
-      // ekler; Google hesap seçiciyi her seferinde gösterir (Clerk v5+ destekli).
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: `${window.location.origin}/sso-callback`,
@@ -92,14 +85,6 @@ function GoogleIcon() {
 
 export default function AuthGate({ children }: AuthGateProps) {
   const { handleGoogleSignIn, isStarting } = useGoogleSignIn();
-
-  useEffect(() => {
-    const msg = sessionStorage.getItem(AUTH_ERROR_KEY);
-    if (msg) {
-      sessionStorage.removeItem(AUTH_ERROR_KEY);
-      toast.error(msg, { duration: 5000 });
-    }
-  }, []);
 
   return (
     <>
