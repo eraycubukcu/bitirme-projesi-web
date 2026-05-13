@@ -15,7 +15,12 @@ interface AuthGateProps {
   children: React.ReactNode;
 }
 
-function SyncGuard({ children }: AuthGateProps) {
+interface SyncGuardProps {
+  children: React.ReactNode;
+  onReject: (msg: string) => void;
+}
+
+function SyncGuard({ children, onReject }: SyncGuardProps) {
   const { isLoaded } = useAuth();
   const { signOut } = useClerk();
   const [status, setStatus] = useState<"loading" | "ok" | "rejected">("loading");
@@ -32,11 +37,11 @@ function SyncGuard({ children }: AuthGateProps) {
               `Bu hesap kabul edilmiyor. Lütfen @${ALLOWED_DOMAIN} uzantılı okul hesabınızla giriş yapın.`
             : "Kimlik doğrulaması başarısız. Lütfen tekrar deneyin.";
         toast.error(msg, { duration: 6000 });
+        onReject(msg);
         setStatus("rejected");
-        // Toast okunabilsin diye kısa bir gecikme sonra sign out
         setTimeout(() => signOut(), 1500);
       });
-  }, [isLoaded, signOut]);
+  }, [isLoaded, signOut, onReject]);
 
   if (status === "loading" || status === "rejected") {
     return (
@@ -49,17 +54,15 @@ function SyncGuard({ children }: AuthGateProps) {
   return <>{children}</>;
 }
 
-function useGoogleSignIn() {
+function useGoogleSignIn(onStart: () => void) {
   const { signIn, isLoaded } = useSignIn();
   const [isStarting, setIsStarting] = useState(false);
 
   const handleGoogleSignIn = async () => {
     if (!isLoaded || !signIn || isStarting) return;
     setIsStarting(true);
+    onStart();
     try {
-      // create() ile OAuth URL'i alıp prompt=select_account ekleriz.
-      // authenticateWithRedirect + oidcPrompt yöntemi shared credentials
-      // modunda Google'a iletilmediğinden bu yaklaşım daha güvenilir.
       const attempt = await signIn.create({
         strategy: "oauth_google",
         redirectUrl: `${window.location.origin}/sso-callback`,
@@ -92,7 +95,8 @@ function GoogleIcon() {
 }
 
 export default function AuthGate({ children }: AuthGateProps) {
-  const { handleGoogleSignIn, isStarting } = useGoogleSignIn();
+  const [authError, setAuthError] = useState<string | null>(null);
+  const { handleGoogleSignIn, isStarting } = useGoogleSignIn(() => setAuthError(null));
 
   return (
     <>
@@ -109,14 +113,22 @@ export default function AuthGate({ children }: AuthGateProps) {
               </p>
             </div>
 
-            <button
-              onClick={handleGoogleSignIn}
-              disabled={isStarting}
-              className="w-full py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-medium rounded-lg hover:bg-black dark:hover:bg-zinc-100 transition flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <GoogleIcon />
-              {isStarting ? "Yönlendiriliyor..." : "Google ile Giriş Yap"}
-            </button>
+            <div className="space-y-3">
+              {authError && (
+                <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+                  {authError}
+                </div>
+              )}
+
+              <button
+                onClick={handleGoogleSignIn}
+                disabled={isStarting}
+                className="w-full py-2.5 bg-gray-900 dark:bg-white text-white dark:text-black text-sm font-medium rounded-lg hover:bg-black dark:hover:bg-zinc-100 transition flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <GoogleIcon />
+                {isStarting ? "Yönlendiriliyor..." : "Google ile Giriş Yap"}
+              </button>
+            </div>
 
             <p className="text-xs text-gray-400">
               Sadece{" "}
@@ -127,7 +139,7 @@ export default function AuthGate({ children }: AuthGateProps) {
         </div>
       </SignedOut>
       <SignedIn>
-        <SyncGuard>{children}</SyncGuard>
+        <SyncGuard onReject={setAuthError}>{children}</SyncGuard>
       </SignedIn>
     </>
   );
