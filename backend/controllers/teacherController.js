@@ -29,9 +29,7 @@ async function runCascade() {
     const teacherCandidates = new Map();
 
     for (const student of unassigned) {
-      // İlk tercih (index 0) hoca seçim aşamasında zaten işlendi;
-      // cascade sadece 2. tercihten itibaren atar.
-      for (let i = 1; i < student.preferences.length; i++) {
+      for (let i = 0; i < student.preferences.length; i++) {
         const teacherId = student.preferences[i].toString();
         const teacher = teacherMap.get(teacherId);
         if (teacher && teacher.currentCount < teacher.maxQuota) {
