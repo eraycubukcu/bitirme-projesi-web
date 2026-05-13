@@ -57,12 +57,19 @@ function useGoogleSignIn() {
     if (!isLoaded || !signIn || isStarting) return;
     setIsStarting(true);
     try {
-      await signIn.authenticateWithRedirect({
+      // create() ile OAuth URL'i alıp prompt=select_account ekleriz.
+      // authenticateWithRedirect + oidcPrompt yöntemi shared credentials
+      // modunda Google'a iletilmediğinden bu yaklaşım daha güvenilir.
+      const attempt = await signIn.create({
         strategy: "oauth_google",
         redirectUrl: `${window.location.origin}/sso-callback`,
-        redirectUrlComplete: window.location.origin,
         oidcPrompt: "select_account",
       });
+      const oauthUrl = attempt.firstFactorVerification.externalVerificationRedirectURL;
+      if (!oauthUrl) throw new Error("OAuth URL alınamadı");
+      const url = new URL(oauthUrl.toString());
+      url.searchParams.set("prompt", "select_account");
+      window.location.href = url.toString();
     } catch {
       toast.error("Giriş başlatılamadı, tekrar deneyin.");
       setIsStarting(false);
