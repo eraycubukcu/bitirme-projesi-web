@@ -9,6 +9,7 @@ import formRoutes from "./routes/formRoute.js";
 import studentRoutes from "./routes/studentRoute.js";
 import authRoutes from "./routes/authRoute.js";
 import FormConfig from "./models/FormConfig.js";
+import Teacher from "./models/Teacher.js";
 import { runCascade } from "./controllers/teacherController.js";
 import { clerkMw } from "./middleware/clerkAuth.js";
 
