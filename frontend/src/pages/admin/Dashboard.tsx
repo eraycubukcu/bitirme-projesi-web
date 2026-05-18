@@ -34,6 +34,15 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  // Cascade çalışırken sayfanın scroll'unu kilitle
+  useEffect(() => {
+    if (cascading) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [cascading]);
+
   const handleCascade = async (force = false) => {
     setCascading(true);
     setShowCascadeConfirm(false);
@@ -401,6 +410,34 @@ const Dashboard = () => {
                 </button>
               </div>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* ── Cascade çalışırken tüm ekranı engelleyen overlay ────────────── */}
+      {cascading && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]"
+          role="alertdialog"
+          aria-modal="true"
+          aria-label="Otomatik atama yapılıyor"
+        >
+          <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-2xl shadow-xl
+            px-8 py-7 max-w-sm w-[90%] mx-4 text-center">
+            <div className="flex justify-center mb-4">
+              <div
+                className="w-10 h-10 border-gray-200 dark:border-zinc-800
+                  border-t-gray-900 dark:border-t-white rounded-full animate-spin"
+                style={{ borderWidth: 3 }}
+              />
+            </div>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5">
+              Otomatik atama yapılıyor
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-zinc-400 leading-relaxed">
+              Öğrenciler tercihlerine göre danışmanlara atanıyor.
+              Lütfen bekleyin, bu sırada başka işlem yapmayın.
+            </p>
           </div>
         </div>
       )}

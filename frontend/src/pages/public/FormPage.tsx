@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useUser } from "@clerk/clerk-react";
 import api from "../../services/api";
 import type { Field, FormConfig } from "../../types";
 import { SkeletonField, SkeletonLine, SkeletonPreferenceItem } from "../components/Skeleton";
@@ -6,6 +7,12 @@ import AuthGate from "../../components/AuthGate";
 import { toast } from "sonner";
 
 function FormPageContent() {
+  const { user } = useUser();
+  const clerkEmail =
+    user?.primaryEmailAddress?.emailAddress ||
+    user?.emailAddresses?.[0]?.emailAddress ||
+    "";
+
   const [form, setForm] = useState<FormConfig | null>(null);
   const [teachers, setTeachers] = useState<any[]>([]);
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -17,6 +24,22 @@ function FormPageContent() {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragNode = useRef<HTMLDivElement | null>(null);
   useEffect(() => { document.title = "Bitirme Projesi Danışman Seçimi"; }, []);
+
+  // Okul maili: form'daki email alanlarını Clerk'ten gelen email ile doldur
+  useEffect(() => {
+    if (!form || !clerkEmail) return;
+    setFormData((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const f of form.textFields) {
+        if (f.fieldType === "email" && next[f.key] !== clerkEmail) {
+          next[f.key] = clerkEmail;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [form, clerkEmail]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -299,7 +322,9 @@ function FormPageContent() {
                   undefined
                 }
                 value={formData[field.key] || ""}
+                readOnly={field.fieldType === "email"}
                 onChange={(e) => {
+                  if (field.fieldType === "email") return;
                   let val = e.target.value;
                   if (field.key === "gpa") {
                     val = val.replace(",", ".");
@@ -341,10 +366,18 @@ function FormPageContent() {
                   field.fieldType === "number" ? "Yalnızca rakam" :
                   ""
                 }
-                className="w-full mt-1 border-b dark:border-zinc-700 py-2 text-sm bg-transparent
-                text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-zinc-600
-                focus:outline-none focus:border-gray-900 dark:focus:border-white"
+                className={`w-full mt-1 border-b dark:border-zinc-700 py-2 text-sm
+                  text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-zinc-600
+                  focus:outline-none focus:border-gray-900 dark:focus:border-white
+                  ${field.fieldType === "email"
+                    ? "bg-gray-50 dark:bg-zinc-900/40 text-gray-500 dark:text-zinc-400 cursor-not-allowed"
+                    : "bg-transparent"}`}
               />
+              {field.fieldType === "email" && (
+                <p className="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">
+                  Okul hesabınızdan otomatik dolduruldu, değiştirilemez.
+                </p>
+              )}
             </div>
           ))}
         </div>

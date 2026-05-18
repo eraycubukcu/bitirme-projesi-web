@@ -24,8 +24,7 @@ export const getForm = async (req, res) => {
       await form.save();
     }
 
-    const { cascadeDate, cascadeExecuted, ...publicForm } = form.toObject();
-    res.json(publicForm);
+    res.json(form);
   } catch (error) {
     res.status(500).json({ message: "Server hatası" });
   }
