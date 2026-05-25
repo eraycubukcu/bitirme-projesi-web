@@ -15,6 +15,7 @@ import { clerkMw } from "./middleware/clerkAuth.js";
 
 // JWT_SECRET zorunlu — eksikse başlatma
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error("HATA: JWT_SECRET tanımlı değil veya çok kısa (min 32 karakter).");
   process.exit(1);
 }
 
@@ -64,10 +65,13 @@ app.use((err, req, res, next) => {
   if (err.message?.includes("CORS")) {
     return res.status(403).json({ message: "Bu kaynaktan erişim engellendi." });
   }
+  console.error(err);
   res.status(500).json({ message: "Sunucu hatası." });
 });
 
-app.listen(PORT);
+app.listen(PORT, () => {
+  console.log(`Sunucu ${PORT} portunda çalışıyor.`);
+});
 
 // ── Otomatik cascade zamanlayıcısı (her 60 saniyede bir kontrol) ──────────────
 // Tarih geçmiş olsa bile tüm hocalar seçimini tamamlamadan başlamaz.
@@ -87,7 +91,7 @@ setInterval(async () => {
 
     await runCascade();
     await FormConfig.findByIdAndUpdate(form._id, { cascadeExecuted: true });
-  } catch {
-    // cascade hatası — sonraki döngüde tekrar denenecek
+  } catch (err) {
+    console.error("[Zamanlayıcı] Cascade hatası:", err.message);
   }
 }, 60_000);
