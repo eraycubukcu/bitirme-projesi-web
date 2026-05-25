@@ -23,6 +23,14 @@ router.post("/login", loginLimiter, adminLogin);
 router.get("/dashboard", protect, getDashboard);
 router.get("/teachers", protect, getTeachersAdmin);
 router.get("/assigned", protect, getAssignedStudents);
-router.post("/cascade", protect, triggerCascade);
+const cascadeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 3,
+  message: { message: "Çok sık tetikleme. Lütfen biraz bekleyin." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.post("/cascade", protect, cascadeLimiter, triggerCascade);
 
 export default router;

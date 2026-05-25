@@ -6,69 +6,78 @@ import jwt from "jsonwebtoken";
 const DUMMY_HASH = "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ01234u";
 
 // ─── Cascade algoritması ──────────────────────────────────────────────────────
-// Atanmamış öğrencileri sıradaki tercihlerine atar. Aynı hocayı isteyen
-// birden fazla öğrenci varsa ve kontenjan yetmiyorsa not ortalaması (gpa)
-// yüksek olan öğrenci öncelikli atanır.
-// Her turda tüm öğrenciler eş zamanlı yarışır; tur sonunda atanmayanlar
-// bir sonraki tercihlerine geçer.
+let cascadeLock = false;
+
 async function runCascade() {
-  let madeAssignment = true;
+  if (cascadeLock) return;
+  cascadeLock = true;
 
-  while (madeAssignment) {
-    madeAssignment = false;
+  try {
+    let madeAssignment = true;
 
-    const unassigned = await Student.find({ status: "unassigned" });
-    if (unassigned.length === 0) break;
+    while (madeAssignment) {
+      madeAssignment = false;
 
-    // Güncel hoca verilerini çek
-    const allTeachers = await Teacher.find();
-    const teacherMap = new Map(allTeachers.map((t) => [t._id.toString(), t]));
+      const unassigned = await Student.find({ status: "unassigned" });
+      if (unassigned.length === 0) break;
 
-    // Her öğrenci için ilk uygun tercihini bul ve o hocaya aday olarak ekle
-    // teacherCandidates: teacherId -> [student, ...]
-    const teacherCandidates = new Map();
+      const allTeachers = await Teacher.find();
+      const teacherMap = new Map(allTeachers.map((t) => [t._id.toString(), t]));
 
-    for (const student of unassigned) {
-      for (let i = 0; i < student.preferences.length; i++) {
-        const teacherId = student.preferences[i].toString();
-        const teacher = teacherMap.get(teacherId);
-        if (teacher && teacher.currentCount < teacher.maxQuota) {
-          if (!teacherCandidates.has(teacherId)) {
-            teacherCandidates.set(teacherId, []);
+      const teacherCandidates = new Map();
+
+      for (const student of unassigned) {
+        let matched = false;
+        for (let i = 0; i < student.preferences.length; i++) {
+          const teacherId = student.preferences[i]?.toString();
+          if (!teacherId) continue;
+          const teacher = teacherMap.get(teacherId);
+          if (teacher && teacher.currentCount < teacher.maxQuota) {
+            if (!teacherCandidates.has(teacherId)) {
+              teacherCandidates.set(teacherId, []);
+            }
+            teacherCandidates.get(teacherId).push(student);
+            matched = true;
+            break;
           }
-          teacherCandidates.get(teacherId).push(student);
-          break; // Bu öğrenci için sadece bir sonraki uygun tercih
+        }
+        if (!matched) { /* uygun hoca yok — öğrenci unassigned kalır */ }
+      }
+
+      for (const [teacherId, candidates] of teacherCandidates) {
+        const teacher = teacherMap.get(teacherId);
+        if (!teacher) continue;
+
+        const availableSlots = teacher.maxQuota - teacher.currentCount;
+        if (availableSlots <= 0) continue;
+
+        candidates.sort((a, b) => {
+          const gpaA = parseFloat(a.formData?.gpa ?? "") || 0;
+          const gpaB = parseFloat(b.formData?.gpa ?? "") || 0;
+          return gpaB - gpaA;
+        });
+
+        const toAssign = candidates.slice(0, availableSlots);
+
+        for (const student of toAssign) {
+          const updated = await Teacher.findOneAndUpdate(
+            { _id: teacher._id, $expr: { $lt: ["$currentCount", "$maxQuota"] } },
+            { $inc: { currentCount: 1 } },
+            { new: true },
+          );
+          if (!updated) continue;
+
+          student.assignedTeacher = teacher._id;
+          student.status = "assigned";
+          await student.save();
+          teacher.currentCount = updated.currentCount;
+          madeAssignment = true;
         }
       }
     }
 
-    // Her hoca için adayları not ortalamasına göre sırala, kontenjan kadar ata
-    for (const [teacherId, candidates] of teacherCandidates) {
-      const teacher = teacherMap.get(teacherId);
-      if (!teacher) continue;
-
-      const availableSlots = teacher.maxQuota - teacher.currentCount;
-      if (availableSlots <= 0) continue;
-
-      // Not ortalaması yüksek olan önce gelsin (büyükten küçüğe)
-      candidates.sort((a, b) => {
-        const gpaA = parseFloat(a.formData?.gpa) || 0;
-        const gpaB = parseFloat(b.formData?.gpa) || 0;
-        return gpaB - gpaA;
-      });
-
-      const toAssign = candidates.slice(0, availableSlots);
-
-      for (const student of toAssign) {
-        student.assignedTeacher = teacher._id;
-        student.status = "assigned";
-        await student.save();
-        await Teacher.findByIdAndUpdate(teacher._id, {
-          $inc: { currentCount: 1 },
-        });
-        madeAssignment = true;
-      }
-    }
+  } finally {
+    cascadeLock = false;
   }
 }
 
@@ -114,24 +123,18 @@ export const getMyStudents = async (req, res) => {
     const teacherId = req.teacher._id;
     const teacher = await Teacher.findById(teacherId);
 
-    const [totalTeachers, finalizedCount] = await Promise.all([
-      Teacher.countDocuments(),
-      Teacher.countDocuments({ hasFinalized: true }),
+    const [approvedStudents, waitingStudents] = await Promise.all([
+      Student.find({
+        assignedTeacher: teacherId,
+        "preferences.0": teacherId,
+      }).populate("preferences"),
+      Student.find({
+        "preferences.0": teacherId,
+        status: "unassigned",
+      }).populate("preferences"),
     ]);
 
-    // Onaylanmış (bu hocaya atanmış, 1. tercihi bu hoca olan) öğrenciler
-    const approvedStudents = await Student.find({
-      assignedTeacher: teacherId,
-      "preferences.0": teacherId,
-    }).populate("preferences");
-
-    // Bekleyen (henüz atanmamış, 1. tercihi bu hoca olan) öğrenciler
-    const waitingStudents = await Student.find({
-      "preferences.0": teacherId,
-      status: "unassigned",
-    }).populate("preferences");
-
-    res.json({ students: waitingStudents, approvedStudents, teacher, finalizedCount, totalTeachers });
+    res.json({ students: waitingStudents, approvedStudents, teacher });
   } catch (error) {
     res.status(500).json({ message: "Öğrenciler alınamadı" });
   }
@@ -166,14 +169,16 @@ export const finalizeApproval = async (req, res) => {
       const previouslyApproved = await Student.find({
         assignedTeacher: teacherId,
         "preferences.0": teacherId,
+        status: "assigned",
       });
       for (const student of previouslyApproved) {
         student.assignedTeacher = null;
         student.status = "unassigned";
         await student.save();
       }
+      const actualCount = await Student.countDocuments({ assignedTeacher: teacherId, status: "assigned" });
       await Teacher.findByIdAndUpdate(teacherId, {
-        $inc: { currentCount: -previouslyApproved.length },
+        currentCount: actualCount,
         hasFinalized: false,
       });
       teacher = await Teacher.findById(teacherId);
@@ -211,8 +216,6 @@ export const finalizeApproval = async (req, res) => {
     const finalizedCount = totalTeachers - pendingCount;
     const allFinalized = pendingCount === 0;
 
-    // Otomatik cascade kaldırıldı — admin "Manuel Başlat" ile tetikler
-
     res.json({
       message: `Onayınız alındı. ${finalizedCount}/${totalTeachers} hoca tamamladı.`,
       allFinalized,
@@ -232,6 +235,12 @@ export const createTeacher = async (req, res) => {
     if (!name || !username || !password || minQuota === undefined || maxQuota === undefined) {
       return res.status(400).json({
         message: "İsim, kullanıcı adı, şifre, min ve max öğrenci sayısı zorunludur.",
+      });
+    }
+
+    if (minQuota < 0 || maxQuota < 1) {
+      return res.status(400).json({
+        message: "Minimum 0 veya üstü, maksimum 1 veya üstü olmalıdır.",
       });
     }
 
@@ -275,6 +284,12 @@ export const deleteTeacher = async (req, res) => {
     if (!teacher) {
       return res.status(400).json({ message: "Hoca bulunamadı" });
     }
+
+    await Student.updateMany(
+      { preferences: req.params.id },
+      { $pull: { preferences: req.params.id } },
+    );
+
     res.json({ message: "Hoca silindi" });
   } catch (error) {
     res.status(500).json({ message: "Server hatası" });

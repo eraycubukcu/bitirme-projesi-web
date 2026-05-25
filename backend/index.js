@@ -14,8 +14,7 @@ import { runCascade } from "./controllers/teacherController.js";
 import { clerkMw } from "./middleware/clerkAuth.js";
 
 // JWT_SECRET zorunlu — eksikse başlatma
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 16) {
-  console.error("HATA: JWT_SECRET tanımlı değil veya çok kısa (min 16 karakter).");
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
@@ -65,13 +64,10 @@ app.use((err, req, res, next) => {
   if (err.message?.includes("CORS")) {
     return res.status(403).json({ message: "Bu kaynaktan erişim engellendi." });
   }
-  console.error(err);
   res.status(500).json({ message: "Sunucu hatası." });
 });
 
-app.listen(PORT, () => {
-  console.log(`Sunucu ${PORT} portunda çalışıyor.`);
-});
+app.listen(PORT);
 
 // ── Otomatik cascade zamanlayıcısı (her 60 saniyede bir kontrol) ──────────────
 // Tarih geçmiş olsa bile tüm hocalar seçimini tamamlamadan başlamaz.
@@ -87,18 +83,11 @@ setInterval(async () => {
       Teacher.countDocuments({ hasFinalized: true }),
     ]);
 
-    if (totalTeachers === 0 || finalizedCount < totalTeachers) {
-      console.log(
-        `[Zamanlayıcı] Cascade tarihi geçti ama ${totalTeachers - finalizedCount} hoca henüz onaylamadı — bekleniyor.`
-      );
-      return;
-    }
+    if (totalTeachers === 0 || finalizedCount < totalTeachers) return;
 
-    console.log("[Zamanlayıcı] Tüm hocalar onayladı, otomatik atama başlıyor...");
     await runCascade();
     await FormConfig.findByIdAndUpdate(form._id, { cascadeExecuted: true });
-    console.log("[Zamanlayıcı] Otomatik cascade tamamlandı.");
-  } catch (err) {
-    console.error("[Zamanlayıcı] Cascade hatası:", err.message);
+  } catch {
+    // cascade hatası — sonraki döngüde tekrar denenecek
   }
 }, 60_000);

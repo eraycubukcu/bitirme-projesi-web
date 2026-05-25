@@ -65,6 +65,10 @@ const TeachersPage = () => {
       setModalError("Yeni hoca için şifre zorunludur.");
       return;
     }
+    if (minQuota < 0) {
+      setModalError("Min değer 0 veya üstü olmalıdır.");
+      return;
+    }
     if (minQuota > maxQuota) {
       setModalError("Min değer, max değerden büyük olamaz.");
       return;

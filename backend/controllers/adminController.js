@@ -50,8 +50,8 @@ export const adminLogin = async (req, res) => {
 export const getDashboard = async (req, res) => {
   try {
     const [studentCount, assignedCount, form, teachers] = await Promise.all([
-      Student.countDocuments(),
-      Student.countDocuments({ status: "assigned" }),
+      Student.countDocuments({ formData: { $ne: {} } }),
+      Student.countDocuments({ status: "assigned", formData: { $ne: {} } }),
       FormConfig.findOne(),
       Teacher.find().select("name hasFinalized maxQuota currentCount"),
     ]);

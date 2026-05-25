@@ -160,6 +160,7 @@ function FormPageContent() {
   };
 
   const validateFields = (): string => {
+    if (!form?.textFields?.length) return "Form alanları yüklenemedi.";
     for (const field of form.textFields) {
       const value = (formData[field.key] || "").trim();
       if (field.required && !value) return `"${field.label}" alanı boş bırakılamaz.`;
@@ -207,7 +208,7 @@ function FormPageContent() {
     try {
       await api.post("/students/submit", {
         formData,
-        preferences: teachers.map((t) => t._id),
+        preferences: teachers.map((t) => t._id).filter(Boolean),
       });
 
       if (hasExistingSubmission) {
@@ -390,12 +391,17 @@ function FormPageContent() {
             Hocaları sürükleyerek veya ok tuşlarıyla istediğiniz sıraya göre düzenleyebilirsiniz.
           </p>
 
+          {teachers.length === 0 ? (
+            <div className="py-6 text-center text-sm text-gray-400 dark:text-zinc-600 border dark:border-zinc-800 border-dashed rounded-xl">
+              Henüz danışman eklenmedi.
+            </div>
+          ) : (
           <div className="space-y-2">
             {teachers.map((teacher, index) => (
               <div
                 key={teacher._id}
-                draggable
-                onDragStart={(e) => handleDragStart(e, index)}
+                draggable={!isSubmitting}
+                onDragStart={(e) => { if (isSubmitting) { e.preventDefault(); return; } handleDragStart(e, index); }}
                 onDragOver={(e) => handleDragOver(e, index)}
                 onDrop={(e) => handleDrop(e, index)}
                 onDragEnd={handleDragEnd}
@@ -418,7 +424,7 @@ function FormPageContent() {
                   </span>
                   <span className="text-gray-400 mt-0.5 shrink-0">{index + 1}</span>
                   <div className="min-w-0">
-                    <p className="text-gray-800 dark:text-white text-sm">{teacher.name}</p>
+                    <p className="text-gray-800 dark:text-white text-sm truncate">{teacher.name}</p>
                     {teacher.bio && (
                       <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5 leading-relaxed">
                         {teacher.bio}
@@ -431,14 +437,14 @@ function FormPageContent() {
                 <div className="flex gap-1 shrink-0 ml-2">
                   <button
                     onClick={() => moveUp(index)}
-                    disabled={index === 0}
+                    disabled={index === 0 || isSubmitting}
                     className="w-9 h-9 flex items-center justify-center border dark:border-zinc-700 rounded-lg
                     text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900
                     disabled:opacity-25 disabled:cursor-not-allowed transition active:scale-95"
                   >↑</button>
                   <button
                     onClick={() => moveDown(index)}
-                    disabled={index === teachers.length - 1}
+                    disabled={index === teachers.length - 1 || isSubmitting}
                     className="w-9 h-9 flex items-center justify-center border dark:border-zinc-700 rounded-lg
                     text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900
                     disabled:opacity-25 disabled:cursor-not-allowed transition active:scale-95"
@@ -447,6 +453,7 @@ function FormPageContent() {
               </div>
             ))}
           </div>
+          )}
         </div>
 
         {error && (

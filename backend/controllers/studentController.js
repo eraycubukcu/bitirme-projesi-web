@@ -44,8 +44,8 @@ export const submitForm = async (req, res) => {
             return res.status(400).json({ message: `"${field.label}" geçerli bir e-posta adresi olmalıdır.` });
           }
         } else if (field.fieldType === "phone") {
-          const digits = value.replace(/[\s\-().+]/g, "");
-          if (!/^\d+$/.test(digits) || digits.length < 7) {
+          const digits = value.replace(/[\s\-().]/g, "");
+          if (!/^\+?\d{7,15}$/.test(digits)) {
             return res.status(400).json({ message: `"${field.label}" geçerli bir telefon numarası olmalıdır.` });
           }
         } else if (field.key === "gpa") {
@@ -82,33 +82,33 @@ export const submitForm = async (req, res) => {
     // Clerk ile giriş yapılmışsa upsert, yoksa yeni kayıt (eski akış)
     let student;
     if (req.student?.clerkUserId) {
-      const existing = await Student.findOne({ clerkUserId: req.student.clerkUserId });
-
-      if (existing?.status === "assigned") {
-        return res.status(403).json({ message: "Danışman atamanız tamamlandı, tercihleriniz artık değiştirilemez." });
-      }
-
-      student = await Student.findOneAndUpdate(
-        { clerkUserId: req.student.clerkUserId },
-        {
-          $set: {
-            formData,
-            preferences,
-            email: req.student.email,
-            firstName: req.student.firstName,
-            lastName: req.student.lastName,
+      try {
+        student = await Student.findOneAndUpdate(
+          { clerkUserId: req.student.clerkUserId, status: { $ne: "assigned" } },
+          {
+            $set: {
+              formData,
+              preferences,
+              email: req.student.email,
+              firstName: req.student.firstName,
+              lastName: req.student.lastName,
+            },
+            $setOnInsert: { status: "unassigned" },
           },
-          $setOnInsert: { status: "unassigned" },
-        },
-        { upsert: true, new: true }
-      );
+          { upsert: true, new: true },
+        );
+      } catch (err) {
+        if (err.code === 11000) {
+          return res.status(403).json({ message: "Danışman atamanız tamamlandı, tercihleriniz artık değiştirilemez." });
+        }
+        throw err;
+      }
     } else {
       student = await Student.create({ formData, preferences });
     }
 
     res.status(201).json({ message: "Form gönderildi", student });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Server hatası" });
   }
 };

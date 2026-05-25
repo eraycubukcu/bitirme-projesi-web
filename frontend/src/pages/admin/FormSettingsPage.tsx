@@ -124,6 +124,10 @@ const FormSettingsPage = () => {
       setDateError("Kapanış tarihi açılış tarihinden sonra olmalıdır.");
       return;
     }
+    if (cascadeInput && startInput && new Date(cascadeInput) < new Date(startInput)) {
+      setDateError("Otomatik atama tarihi form açılış tarihinden önce olamaz.");
+      return;
+    }
     setDateError("");
     setSaving(true);
     setSaveResult(null);

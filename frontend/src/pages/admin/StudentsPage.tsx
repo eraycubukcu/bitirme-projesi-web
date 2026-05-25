@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
+import { toast } from "sonner";
 import api from "../../services/api";
 import { SkeletonBlock, SkeletonLine, SkeletonRow } from "../components/Skeleton";
 
@@ -152,28 +153,32 @@ const StudentsPage = () => {
   }, [students, search, filterTeacher, sortKey, sortDir]);
 
   const exportExcel = () => {
-    const header = ["Öğrenci No", "Danışman"];
+    try {
+      const header = ["Öğrenci No", "Danışman"];
 
-    const rows = processed.map((s) => [
-      s.formData?.ogrenciNo ?? "",
-      s.assignedTeacher?.name ?? "Atanmamış",
-    ]);
+      const rows = processed.map((s) => [
+        s.formData?.ogrenciNo ?? "",
+        s.assignedTeacher?.name ?? "Atanmamış",
+      ]);
 
-    const wsData = [header, ...rows];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws["!cols"] = header.map((_: any, i: number) => ({
-      wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 14),
-    }));
+      const wsData = [header, ...rows];
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      ws["!cols"] = header.map((_: any, i: number) => ({
+        wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 14),
+      }));
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Başvurular");
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Başvurular");
 
-    const suffix = filterTeacher === "unassigned"
-      ? "_atanmamis"
-      : filterTeacher
-      ? `_${teachers.find((t) => t._id === filterTeacher)?.name ?? "hoca"}`
-      : "";
-    XLSX.writeFile(wb, `basvurular${suffix}.xlsx`);
+      const suffix = filterTeacher === "unassigned"
+        ? "_atanmamis"
+        : filterTeacher
+        ? `_${teachers.find((t) => t._id === filterTeacher)?.name ?? "hoca"}`
+        : "";
+      XLSX.writeFile(wb, `basvurular${suffix}.xlsx`);
+    } catch {
+      toast.error("Excel dosyası oluşturulamadı.");
+    }
   };
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import { toast } from "sonner";
 import api from "../../services/api";
 import { SkeletonBlock, SkeletonLine, SkeletonRow } from "../components/Skeleton";
 
@@ -30,25 +31,29 @@ const AssignedStudentsPage = () => {
   }, []);
 
   const exportTeacherExcel = (teacher: any, group: any[]) => {
-    const header = ["Öğrenci No", "Danışman"];
-    const rows = group.map((s) => [
-      s.formData?.ogrenciNo ?? "",
-      teacher.name,
-    ]);
+    try {
+      const header = ["Öğrenci No", "Danışman"];
+      const rows = group.map((s) => [
+        s.formData?.ogrenciNo ?? "",
+        teacher.name,
+      ]);
 
-    const wsData = [header, ...rows];
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws["!cols"] = header.map((_: any, i: number) => ({
-      wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 14),
-    }));
+      const wsData = [header, ...rows];
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      ws["!cols"] = header.map((_: any, i: number) => ({
+        wch: Math.max(header[i].length, ...rows.map((r) => String(r[i] ?? "").length), 14),
+      }));
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, teacher.name.slice(0, 31));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, teacher.name.slice(0, 31));
 
-    const safeFileName = teacher.name
-      .replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ _-]/g, "")
-      .trim();
-    XLSX.writeFile(wb, `${safeFileName}_ogrenciler.xlsx`);
+      const safeFileName = teacher.name
+        .replace(/[^a-zA-Z0-9ğüşıöçĞÜŞİÖÇ _-]/g, "")
+        .trim();
+      XLSX.writeFile(wb, `${safeFileName}_ogrenciler.xlsx`);
+    } catch {
+      toast.error("Excel dosyası oluşturulamadı.");
+    }
   };
 
   if (fetchError) return <div className="p-6 text-red-500">{fetchError}</div>;

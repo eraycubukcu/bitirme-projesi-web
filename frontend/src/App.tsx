@@ -20,25 +20,21 @@ import api from "./services/api";
 function App() {
   const { getToken } = useAuth();
   const getTokenRef = useRef(getToken);
-  getTokenRef.current = getToken; // render sırasında senkron güncelleme
+  getTokenRef.current = getToken;
 
   useEffect(() => {
     const id = api.interceptors.request.use(async (config) => {
-      // Admin/hoca JWT varsa onu kullan (öncelik)
-      const jwtToken = localStorage.getItem("token");
-      if (jwtToken) {
-        config.headers["Authorization"] = `Bearer ${jwtToken}`;
-        return config;
-      }
-      // JWT yoksa Clerk token'ını kullan (öğrenci formu)
-      const clerkToken = await getTokenRef.current();
-      if (clerkToken) {
-        config.headers["Authorization"] = `Bearer ${clerkToken}`;
+      // JWT varsa zaten api.ts'deki interceptor ekliyor, Clerk token'ı ekle
+      if (!localStorage.getItem("token")) {
+        const clerkToken = await getTokenRef.current();
+        if (clerkToken) {
+          config.headers["Authorization"] = `Bearer ${clerkToken}`;
+        }
       }
       return config;
     });
     return () => api.interceptors.request.eject(id);
-  }, []); // Interceptor bir kez eklenir, ref sayesinde her zaman güncel token kullanılır
+  }, []);
 
   return (
     <>

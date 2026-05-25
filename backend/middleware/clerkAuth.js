@@ -37,7 +37,6 @@ export const requireStudent = async (req, res, next) => {
 
     next();
   } catch (err) {
-    console.error("Clerk auth error:", err.message);
     return res.status(401).json({ message: "Kimlik doğrulaması başarısız." });
   }
 };

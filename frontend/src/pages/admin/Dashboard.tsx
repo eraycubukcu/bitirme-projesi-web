@@ -53,8 +53,10 @@ const Dashboard = () => {
       setCascadeResult(res.data);
       toast.success(`Atama tamamlandı — ${res.data.assignedCount} öğrenci atandı.`);
       await fetchData();
-    } catch {
-      toast.error("Otomatik atama sırasında hata oluştu.");
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Otomatik atama sırasında hata oluştu.";
+      setCascadeError(msg);
+      toast.error(msg);
     } finally {
       setCascading(false);
       setForceMode(false);
@@ -421,6 +423,7 @@ const Dashboard = () => {
           role="alertdialog"
           aria-modal="true"
           aria-label="Otomatik atama yapılıyor"
+          tabIndex={-1}
         >
           <div className="bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded-2xl shadow-xl
             px-8 py-7 max-w-sm w-[90%] mx-4 text-center">

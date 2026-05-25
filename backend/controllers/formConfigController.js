@@ -38,6 +38,10 @@ export const updateForm = async (req, res) => {
       return res.status(400).json({ message: "Kapanış tarihi açılış tarihinden sonra olmalıdır." });
     }
 
+    if (cascadeDate && startDate && new Date(cascadeDate) < new Date(startDate)) {
+      return res.status(400).json({ message: "Otomatik atama tarihi form açılış tarihinden önce olamaz." });
+    }
+
     let form = await FormConfig.findOne();
 
     if (!form) {

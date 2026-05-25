@@ -27,10 +27,12 @@ function SyncGuard({ children, onReject }: SyncGuardProps) {
 
   useEffect(() => {
     if (!isLoaded) return;
+    const controller = new AbortController();
     api
-      .post("/auth/sync")
+      .post("/auth/sync", null, { signal: controller.signal })
       .then(() => setStatus("ok"))
       .catch((err) => {
+        if (controller.signal.aborted) return;
         const msg =
           err.response?.status === 403
             ? err.response.data?.message ||
@@ -41,6 +43,7 @@ function SyncGuard({ children, onReject }: SyncGuardProps) {
         setStatus("rejected");
         setTimeout(() => signOut(), 1500);
       });
+    return () => controller.abort();
   }, [isLoaded, signOut, onReject]);
 
   if (status === "loading" || status === "rejected") {

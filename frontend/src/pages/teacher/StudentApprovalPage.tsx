@@ -7,8 +7,6 @@ interface PageData {
   students: any[];
   approvedStudents: any[];
   teacher: any;
-  finalizedCount: number;
-  totalTeachers: number;
 }
 
 const StudentApprovalPage = () => {
@@ -69,7 +67,7 @@ const StudentApprovalPage = () => {
     </div>
   );
 
-  const { teacher, finalizedCount, totalTeachers } = data;
+  const { teacher } = data;
   const columns: any[] = formConfig.textFields || [];
 
   const allStudents = [
@@ -113,25 +111,10 @@ const StudentApprovalPage = () => {
     }
   };
 
-  const isDone = finalizedCount === totalTeachers;
-
   return (
     <div className="p-6 w-full">
       <h1 className="text-xl font-semibold mb-1 text-gray-900 dark:text-white">Öğrenci Onay Listesi</h1>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{teacher.name}</p>
-
-      {/* Onay ilerleme çubuğu */}
-      <div className="mb-5 p-3 bg-gray-50 dark:bg-zinc-900 border dark:border-zinc-800 rounded-xl flex items-center gap-3 text-sm">
-        <div className="flex-1 bg-gray-200 dark:bg-zinc-800 rounded-full h-2">
-          <div
-            className="bg-gray-700 dark:bg-white h-2 rounded-full transition-all"
-            style={{ width: `${totalTeachers > 0 ? (finalizedCount / totalTeachers) * 100 : 0}%` }}
-          />
-        </div>
-        <span className="text-gray-600 dark:text-zinc-300 whitespace-nowrap">
-          {finalizedCount}/{totalTeachers} hoca onayladı
-        </span>
-      </div>
 
       {/* Otomatik atama tarihi */}
       {formConfig?.cascadeDate && !formConfig?.cascadeExecuted && (
@@ -151,15 +134,8 @@ const StudentApprovalPage = () => {
 
       {/* Onay durumu banner */}
       {teacher.hasFinalized && (
-        <div className={`mb-4 p-3 rounded-xl border text-sm ${
-          isDone
-            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400"
-            : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300"
-        }`}>
-          {isDone
-            ? "Tüm hocalar onayladı. Admin otomatik atamayı başlatacak."
-            : "Onayınız alındı. Admin tüm hocalar onayladıktan sonra atamayı başlatacak."}
-          {" "}
+        <div className="mb-4 p-3 rounded-xl border text-sm bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
+          Onayınız alındı.{" "}
           <span className="font-medium">Seçimleri aşağıdan güncelleyebilirsiniz.</span>
         </div>
       )}
@@ -252,7 +228,7 @@ const StudentApprovalPage = () => {
                     </div>
                   ))}
                   <div className="text-xs text-gray-400 space-y-0.5">
-                    {s.preferences.map((p: any, i: number) => (
+                    {(s.preferences || []).map((p: any, i: number) => (
                       <div key={i}>{i + 1}. {i === 0 ? (p?.name || "—") : "***"}</div>
                     ))}
                   </div>

@@ -42,6 +42,9 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+studentSchema.index({ status: 1 });
+studentSchema.index({ assignedTeacher: 1, status: 1 });
+
 const Student = mongoose.model("Student", studentSchema);
 export default Student;
 

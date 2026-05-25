@@ -6,10 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx nodemon",
-    "seed": "node seed/seedAll.js",
-    "seed:teachers": "node seed/teacherSeed.js",
-    "seed:students": "node seed/studentSeed.js",
-    "seed:form": "node seed/formConfigSeed.js"
+    "seed:admin": "node seed/adminSeed.js"
   },
   "keywords": [],
   "author": "",
