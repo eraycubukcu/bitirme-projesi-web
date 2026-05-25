@@ -8,39 +8,48 @@
 - Okul hesabıyla (Google / Clerk) giriş
 - Danışman tercih sıralaması (sürükle-bırak veya ok tuşları)
 - Form açıkken tercih güncelleme
+- Atama tamamlandığında form düzenleme engeli
 
 **Danışman**
 - Kendisini birinci tercih olarak seçen öğrencileri görme
 - Kontenjan dolana kadar öğrenci onaylama
+- Seçimleri güncelleme (admin atamayı başlatana kadar)
 - Profil biyografisi düzenleme
 
 **Admin**
+- Dashboard ile genel durum takibi
+- Başvuru listesi (arama, filtreleme, sıralama, Excel export)
 - Danışman ekleme / düzenleme / silme
-- Form açılış-kapanış tarihi ve alan ayarları
+- Form alan yönetimi (sabit/dinamik alanlar, alan tipleri)
+- Form açılış-kapanış tarihi ayarlama
 - Otomatik atama tarihi belirleme
-- Atama sonuçlarını Excel olarak indirme
+- Manuel veya zorla cascade tetikleme
+- Atama sonuçlarını danışman bazlı Excel olarak indirme
 
 **Otomatik Atama (Cascade)**
 - Tüm danışmanlar onayını tamamladıktan sonra admin başlatır
-- Atanmamış öğrenciler ikinci ve sonraki tercihlerine GPA önceliğiyle atanır
-- Süre geçmiş olsa bile danışmanlar tamamlamadan sistem otomatik başlamaz
+- Atanmamış öğrenciler sıradaki tercihlerine GPA önceliğiyle atanır
+- Atomik kota kontrolü ile kontenjan aşımı engellenir
+- Concurrent çalışma kilidi ile çift atama önlenir
+- Cascade tarihi geldiğinde ve tüm hocalar onayladığında otomatik çalışır
 
 ## Teknolojiler
 
 | Katman | Teknoloji |
 |---|---|
 | Frontend | React 19, TypeScript, Vite, Tailwind CSS v4 |
-| Auth | Clerk (öğrenci) · JWT (danışman/admin) |
+| Auth | Clerk (öğrenci OAuth) · JWT (danışman/admin) |
 | Backend | Node.js, Express 5 |
 | Veritabanı | MongoDB, Mongoose |
 | Güvenlik | Helmet, express-rate-limit, bcryptjs |
+| Diğer | Axios, xlsx (Excel export), Sonner (toast) |
 
 ## Kurulum
 
 ### Gereksinimler
 - Node.js 18+
 - MongoDB bağlantısı (Atlas veya yerel)
-- Clerk hesabı
+- Clerk hesabı (öğrenci girişi için)
 
 ### Backend
 
@@ -83,43 +92,61 @@ VITE_ALLOWED_EMAIL_DOMAIN=okul.edu.tr
 npm run dev
 ```
 
-### Seed (İlk Kurulum)
+### İlk Kurulum
 
 ```bash
 cd backend
-npm run seed        # Admin + danışmanlar + form config
+npm run seed:admin   # Varsayılan admin hesabı oluşturur
 ```
+
+Admin girişi yapıldıktan sonra danışmanlar ve form ayarları admin panelinden yapılır.
 
 ## Kullanım Akışı
 
-```
-Öğrenci formu doldurur → Danışmanlar öğrenci seçer
-→ Admin otomatik atamayı başlatır → Sonuçlar Excel'e aktarılır
-```
-
-1. Admin form açılış/kapanış tarihini ayarlar
-2. Öğrenciler okul hesabıyla giriş yapıp tercih sıralarını belirler
+1. Admin form alanlarını ve açılış/kapanış tarihini ayarlar
+2. Öğrenciler okul hesabıyla giriş yapıp formu doldurur ve tercih sırasını belirler
 3. Danışmanlar kendi panellerinde birinci tercih öğrencileri onaylar
 4. Tüm danışmanlar tamamladığında admin otomatik atamayı başlatır
 5. Kalan öğrenciler sıradaki tercihlerine ve GPA'ya göre atanır
-6. Admin atama sonuçlarını Excel olarak indirebilir
+6. Admin atama sonuçlarını danışman bazlı Excel olarak indirebilir
 
 ## Proje Yapısı
 
 ```
 bitirme-web/
 ├── backend/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   └── index.js
+│   ├── config/          # Veritabanı bağlantısı
+│   ├── controllers/     # İş mantığı (admin, teacher, student, formConfig)
+│   ├── middleware/       # Auth (JWT + Clerk)
+│   ├── models/          # Mongoose şemaları
+│   ├── routes/          # API endpoint tanımları
+│   ├── seed/            # Admin seed
+│   └── index.js         # Express sunucu + cascade zamanlayıcı
 └── frontend/
     └── src/
-        ├── components/
+        ├── components/  # AuthGate, Skeleton
         ├── pages/
-        │   ├── admin/
-        │   ├── teacher/
-        │   └── public/
-        └── services/
+        │   ├── admin/   # Dashboard, TeachersPage, FormSettings, Students, AssignedStudents
+        │   ├── teacher/ # StudentApprovalPage, ProfilePage
+        │   ├── public/  # FormPage (öğrenci formu)
+        │   ├── layouts/ # AdminLayout, TeacherLayout
+        │   └── components/ # ProtectedRoute
+        ├── services/    # Axios instance + interceptors
+        └── types/       # TypeScript interface tanımları
 ```
+
+## API Endpoints
+
+| Method | Endpoint | Auth | Açıklama |
+|--------|----------|------|----------|
+| POST | `/api/admin/login` | - | Admin girişi |
+| GET | `/api/admin/dashboard` | Admin | Dashboard verileri |
+| POST | `/api/admin/cascade` | Admin | Otomatik atama tetikle |
+| GET | `/api/admin/assigned` | Admin | Atama sonuçları |
+| GET/POST/PUT/DELETE | `/api/teachers/*` | Admin | Danışman CRUD |
+| POST | `/api/teachers/login` | - | Danışman girişi |
+| GET | `/api/teachers/my-students` | Teacher | Öğrenci listesi |
+| POST | `/api/teachers/finalize` | Teacher | Öğrenci onaylama |
+| PUT | `/api/teachers/profile` | Teacher | Profil güncelleme |
+| GET/POST | `/api/students/*` | Clerk | Öğrenci form işlemleri |
+| GET/PUT | `/api/form/*` | Public/Admin | Form yapılandırması |
